@@ -37,7 +37,9 @@ PG_PORT = os.getenv("port", "5432")
 PG_DBNAME = os.getenv("dbname", "postgres")
 
 # SQLAlchemy setup
-DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
+# DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
+DATABASE_URL = postgresql://neondb_owner:npg_b5C1sqJGtngN@ep-plain-union-a9t22r24-pooler.gwc.azure.neon.tech/neondb?sslmode=require
+
 engine = create_engine(DATABASE_URL)
 
 # Initialize database
