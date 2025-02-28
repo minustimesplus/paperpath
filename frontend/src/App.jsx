@@ -491,6 +491,63 @@ const groupedSubjects = {
     </div>
   );
 };
+// New component for visualisations
+const ProgressVisualisation = () => {
+  const { token } = useAuth();
+  const [subjects, setSubjects] = useState([]);
+  const [completionData, setCompletionData] = useState({});
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    // Fetch data similar to PaperTracking component
+    Promise.all([
+      axios.get(`${API_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } }),
+      axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
+    ])
+      .then(([subjectsResponse, completionResponse]) => {
+        setSubjects(subjectsResponse.data.subjects || []);
+        setCompletionData(completionResponse.data || {});
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+  
+  if (loading) return <div className="text-center py-4">Loading statistics...</div>;
+  
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Progress Visualisations</h2>
+      
+      {/* Subject Completion Chart */}
+      <div className="mb-6">
+        <h3 className="text-lg font-medium mb-3">Subject Completion</h3>
+        <div className="h-64">
+          <BarChart width={600} height={250} data={/* Transformed subject data */}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="percentComplete" fill="#8884d8" />
+          </BarChart>
+        </div>
+      </div>
+      
+      {/* Paper Completion Timeline */}
+      <div>
+        <h3 className="text-lg font-medium mb-3">Completion Timeline</h3>
+        <div className="h-64">
+          <LineChart width={600} height={250} data={/* Timeline data */}>
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="completed" stroke="#8884d8" />
+          </LineChart>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // Paper Tracking Component
 const PaperTracking = () => {
@@ -772,6 +829,9 @@ const Dashboard = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">IB Paper Tracker</h1>
+          <Link to="/visualisations" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">
+            Visualisations
+          </Link>
           <div className="flex items-center space-x-4">
             <span className="text-gray-700">Hello, {currentUser?.username}</span>
             <button
@@ -802,6 +862,11 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/visualisations" element={
+            <ProtectedRoute>
+              <ProgressVisualisation />
+            </ProtectedRoute>
+          } />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
