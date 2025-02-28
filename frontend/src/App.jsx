@@ -115,7 +115,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">IB Paper Tracker Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">IB Past Paper Tracker - Login</h2>
         
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
         
