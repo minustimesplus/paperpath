@@ -36,6 +36,28 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # SQLAlchemy setup
 engine = create_engine(DATABASE_URL)
 
+# IB Subject Groups
+IB_SUBJECT_GROUPS = {
+    "Group 1 - Studies in Language and Literature": [
+        "English A Literature", "English A Language and Literature", "German A"
+    ],
+    "Group 2 - Language Acquisition": [
+        "English B", "French B", "Spanish B", "German B", "Mandarin B"
+    ],
+    "Group 3 - Individuals and Societies": [
+        "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)"
+    ],
+    "Group 4 - Sciences": [
+        "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)"
+    ],
+    "Group 5 - Mathematics": [
+        "Mathematics: Analysis and Approaches", "Mathematics: Applications and Interpretation"
+    ],
+    "Group 6 - The Arts": [
+        "Visual Arts", "Music", "Theatre", "Film", "Dance", "Design"
+    ]
+}
+
 # Initialize database
 def init_db():
     try:
@@ -329,6 +351,11 @@ async def get_subjects(current_user: UserInDB = Depends(get_current_user)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving subjects"
         )
+
+@app.get("/subject-groups")
+async def get_subject_groups():
+    """Return all available IB subject groups and their subjects"""
+    return {"subject_groups": IB_SUBJECT_GROUPS}
 
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
