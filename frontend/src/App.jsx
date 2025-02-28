@@ -491,7 +491,6 @@ const PaperTracking = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeYears, setActiveYears] = useState({});
   
   const years = [2019, 2020, 2021, 2022, 2023, 2024];
   const sessions = ['May', 'November'];
@@ -504,19 +503,11 @@ const PaperTracking = () => {
       axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
     ])
       .then(([subjectsResponse, completionResponse]) => {
-        const userSubjects = subjectsResponse.data.subjects || [];
-        setSubjects(userSubjects);
+        setSubjects(subjectsResponse.data.subjects || []);
         setCompletionStatus(completionResponse.data || {});
-        if (userSubjects.length > 0) {
-          setSelectedSubject(userSubjects[0]);
+        if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
+          setSelectedSubject(subjectsResponse.data.subjects[0]);
         }
-        
-        // Initialize all years as collapsed
-        const yearsState = {};
-        years.forEach(year => {
-          yearsState[year] = false;
-        });
-        setActiveYears(yearsState);
       })
       .catch(err => {
         console.error('Error fetching data:', err);
@@ -577,44 +568,13 @@ const PaperTracking = () => {
     
     years.forEach(year => {
       sessions.forEach(session => {
-        const papersToCheck = selectedSubject.includes('_hl') ? papers.slice(0, 3) : papers.slice(0, 2);
-        papersToCheck.forEach(paper => {
+        // Use a simplified papersToCheck assignment
+        const papersCount = selectedSubject.includes('_hl') ? 3 : 2;
+        for (let i = 0; i < papersCount; i++) {
           total++;
-          if (getPaperStatus(selectedSubject, year, session, paper)) {
+          if (getPaperStatus(selectedSubject, year, session, papers[i])) {
             completed++;
           }
-        });
-      });
-    });
-    
-    return {
-      completed,
-      total,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
-    };
-  };
-
-  // Toggle year accordion
-  const toggleYear = (year) => {
-    setActiveYears({
-      ...activeYears,
-      [year]: !activeYears[year]
-    });
-  };
-
-  // Calculate year completion
-  const calculateYearCompletion = (year) => {
-    if (!selectedSubject) return { completed: 0, total: 0, percentage: 0 };
-    
-    let completed = 0;
-    let total = 0;
-    
-    sessions.forEach(session => {
-      const papersToCheck = selectedSubject.includes('_hl') ? papers.slice(0, 3) : papers.slice(0, 2);
-      papersToCheck.forEach(paper => {
-        total++;
-        if (getPaperStatus(selectedSubject, year, session, paper)) {
-          completed++;
         }
       });
     });
@@ -627,6 +587,109 @@ const PaperTracking = () => {
   };
   
   const stats = calculateStats();
+
+  if (loading) {
+    return <div className="text-center py-4">Loading your papers...</div>;
+  }
+
+  if (subjects.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
+        <p className="text-gray-500">Please add subjects first to start tracking papers.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
+      
+      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+      
+      <div className="mb-6">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Select Subject to View
+        </label>
+        <select
+          className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          value={selectedSubject}
+          onChange={(e) => setSelectedSubject(e.target.value)}
+        >
+          {subjects.map(subject => (
+            <option key={subject} value={subject}>
+              {getSubjectName(subject)}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      {selectedSubject && (
+        <>
+          <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+            <h3 className="text-lg font-medium mb-2">Completion Status</h3>
+            <div className="flex items-center">
+              <div className="w-full bg-gray-200 rounded-full h-4 mr-4">
+                <div 
+                  className="bg-blue-600 h-4 rounded-full" 
+                  style={{ width: `${stats.percentage}%` }}
+                ></div>
+              </div>
+              <span className="text-sm font-medium">{stats.percentage}%</span>
+            </div>
+            <p className="text-sm mt-2">
+              {stats.completed} of {stats.total} papers completed
+            </p>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 1</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 2</th>
+                  {selectedSubject.includes('_hl') && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 3</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {years.map(year => 
+                  sessions.map((session, sessionIndex) => (
+                    <tr key={`${year}-${session}`} className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
+                      {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
+                        <td key={`${year}-${session}-${paper}`} className="px-6 py-4 whitespace-nowrap">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              checked={getPaperStatus(selectedSubject, year, session, paper)}
+                              onChange={() => updatePaperStatus(
+                                selectedSubject,
+                                year,
+                                session,
+                                paper,
+                                getPaperStatus(selectedSubject, year, session, paper)
+                              )}
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Completed</span>
+                          </label>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 // Dashboard Component
