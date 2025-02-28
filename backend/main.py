@@ -13,6 +13,10 @@ import json
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import psycopg2
+
+load_dotenv()
 
 # Initialize FastAPI
 app = FastAPI(title="IB Paper Tracker API")
@@ -42,48 +46,102 @@ else:
     # For PostgreSQL production
     engine = create_engine(DATABASE_URL)
 
+# Create a SessionLocal class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create a Base class
+Base = declarative_base()
+
+
+
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    # Create users table
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    ''')
-    
-    # Create subjects table
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_subjects (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        subjects TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-    ''')
-    
-    # Create completion status table
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS completion_status (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        subject_id TEXT NOT NULL,
-        year INTEGER NOT NULL,
-        session TEXT NOT NULL,
-        paper TEXT NOT NULL,
-        is_completed BOOLEAN NOT NULL DEFAULT 0,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-    ''')
-    
-    conn.commit()
-    conn.close()
+    if DATABASE_URL.startswith("sqlite"):
+        # SQLite initialization
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # Create users table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
+        
+        # Create subjects table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            subjects TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        ''')
+        
+        # Create completion status table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS completion_status (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            subject_id TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            session TEXT NOT NULL,
+            paper TEXT NOT NULL,
+            is_completed BOOLEAN NOT NULL DEFAULT 0,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        ''')
+        
+        conn.commit()
+        conn.close()
+    else:
+        # PostgreSQL initialization
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # Create users table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
+        
+        # Create subjects table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_subjects (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            subjects TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        ''')
+        
+        # Create completion status table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS completion_status (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            subject_id TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            session TEXT NOT NULL,
+            paper TEXT NOT NULL,
+            is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        ''')
+        
+        cursor.close()
+        conn.close()
 
 # Initialize database on startup
 @app.on_event("startup")
