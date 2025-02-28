@@ -577,7 +577,7 @@ const PaperTracking = () => {
     
     years.forEach(year => {
       sessions.forEach(session => {
-        const papersToCheck = selectedSubject.includes('_hl') && paper === 'Paper 3' ? papers : papers.slice(0, 2);
+        const papersToCheck = selectedSubject.includes('_hl') ? papers.slice(0, 3) : papers.slice(0, 2);
         papersToCheck.forEach(paper => {
           total++;
           if (getPaperStatus(selectedSubject, year, session, paper)) {
@@ -610,7 +610,7 @@ const PaperTracking = () => {
     let total = 0;
     
     sessions.forEach(session => {
-      const papersToCheck = selectedSubject.includes('_hl') ? papers : papers.slice(0, 2);
+      const papersToCheck = selectedSubject.includes('_hl') ? papers.slice(0, 3) : papers.slice(0, 2);
       papersToCheck.forEach(paper => {
         total++;
         if (getPaperStatus(selectedSubject, year, session, paper)) {
