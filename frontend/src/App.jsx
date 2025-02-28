@@ -293,8 +293,8 @@ const SubjectSelection = ({ onSubjectsChange }) => {
   const [subjects, setSubjects] = useState([]);
   const [availableSubjects, setAvailableSubjects] = useState([
     // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL', group: 1 },
+    { id: 'english_a_sl', name: 'English A Lit SL', group: 1 },
+    { id: 'english_a_hl', name: 'English A Lit HL', group: 1 },
     { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
     { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
     
@@ -499,8 +499,8 @@ const PaperTracking = () => {
   const [completionStatus, setCompletionStatus] = useState({});
   const [availableSubjects, setAvailableSubjects] = useState([
     // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL', group: 1 },
+    { id: 'english_a_sl', name: 'English A Lit SL', group: 1 },
+    { id: 'english_a_hl', name: 'English A Lit HL', group: 1 },
     { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
     { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
     
