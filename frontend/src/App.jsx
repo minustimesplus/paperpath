@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://papertrackerforib.onrender.com';
+const API_URL = 'http://localhost:8000';
 
 // Auth Context
 const AuthContext = React.createContext();
@@ -317,9 +317,9 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'computer_science_sl', name: 'Computer Science SL' },
     { id: 'computer_science_hl', name: 'Computer Science HL' },
   ]);
-  const [selectedSubject, setSelectedSubject] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     // Fetch user's subjects
@@ -334,54 +334,32 @@ const SubjectSelection = ({ onSubjectsChange }) => {
       });
   }, [token]);
 
-  const handleAddSubject = () => {
-    if (!selectedSubject) return;
+  const toggleSubject = (subjectId) => {
+    let newSubjects;
     
-    // Check if subject already added
-    if (subjects.includes(selectedSubject)) {
-      setError('This subject has already been added');
-      return;
+    if (subjects.includes(subjectId)) {
+      // Remove subject if already selected
+      newSubjects = subjects.filter(s => s !== subjectId);
+    } else {
+      // Add subject if not already selected
+      newSubjects = [...subjects, subjectId];
     }
     
-    const newSubjects = [...subjects, selectedSubject];
-    
     // Save to API
     axios.post(`${API_URL}/subjects`, { subjects: newSubjects }, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
         setSubjects(newSubjects);
-        setSelectedSubject('');
-        setMessage('Subject added successfully');
+        setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
         setError('');
         setTimeout(() => setMessage(''), 3000);
         // Notify parent component about the change
         if (onSubjectsChange) onSubjectsChange();
       })
       .catch(err => {
-        console.error('Error saving subjects:', err);
-        setError('Failed to save subject');
-      });
-  };
-
-  const handleRemoveSubject = (subjectId) => {
-    const newSubjects = subjects.filter(s => s !== subjectId);
-    
-    // Save to API
-    axios.post(`${API_URL}/subjects`, { subjects: newSubjects }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setSubjects(newSubjects);
-        setMessage('Subject removed successfully');
-        setError('');
-        setTimeout(() => setMessage(''), 3000);
-        // Notify parent component about the change
-        if (onSubjectsChange) onSubjectsChange();
-      })
-      .catch(err => {
-        console.error('Error removing subject:', err);
-        setError('Failed to remove subject');
+        console.error('Error updating subjects:', err);
+        setError('Failed to update subjects');
       });
   };
 
@@ -390,59 +368,88 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     return subject ? subject.name : subjectId;
   };
 
+  // Group subjects by category
+  const groupedSubjects = {
+    'Mathematics': availableSubjects.filter(s => s.id.startsWith('math_')),
+    'Sciences': availableSubjects.filter(s => 
+      s.id.startsWith('physics_') || 
+      s.id.startsWith('chemistry_') || 
+      s.id.startsWith('biology_') || 
+      s.id.startsWith('computer_science_')
+    ),
+    'Languages': availableSubjects.filter(s => 
+      s.id.startsWith('english_') || 
+      s.id.startsWith('french_') || 
+      s.id.startsWith('spanish_')
+    ),
+    'Humanities': availableSubjects.filter(s => 
+      s.id.startsWith('economics_') || 
+      s.id.startsWith('history_') || 
+      s.id.startsWith('psychology_')
+    )
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">My Subjects</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">My Subjects</h2>
+        <button 
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
+        >
+          {isDropdownOpen ? 'Hide' : 'Edit'} Subjects
+          <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ml-1 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
       
       {message && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{message}</div>}
       {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
       
+      {/* Selected subjects display */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          Add a Subject
-        </label>
-        <div className="flex">
-          <select
-            className="shadow border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline flex-grow"
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-          >
-            <option value="">Select a subject...</option>
-            {availableSubjects.map(subject => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
+        <h3 className="text-lg font-medium mb-2">Selected Subjects:</h3>
+        {subjects.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {subjects.map(subject => (
+              <span key={subject} className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">
+                {getSubjectName(subject)}
+              </span>
             ))}
-          </select>
-          <button
-            onClick={handleAddSubject}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
-            disabled={!selectedSubject}
-          >
-            Add
-          </button>
-        </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">No subjects selected yet. Edit subjects to get started.</p>
+        )}
       </div>
       
-      {subjects.length > 0 ? (
-        <div>
-          <h3 className="text-lg font-medium mb-2">Your Selected Subjects:</h3>
-          <ul className="divide-y divide-gray-200">
-            {subjects.map(subject => (
-              <li key={subject} className="py-3 flex justify-between items-center">
-                <span>{getSubjectName(subject)}</span>
-                <button
-                  onClick={() => handleRemoveSubject(subject)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* Subject selection dropdown */}
+      {isDropdownOpen && (
+        <div className="mt-6 border-t pt-4">
+          <h3 className="text-lg font-medium mb-4">Select Your IB Subjects:</h3>
+          
+          {Object.entries(groupedSubjects).map(([category, subjectList]) => (
+            <div key={category} className="mb-6">
+              <h4 className="text-md font-medium text-gray-700 mb-2">{category}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {subjectList.map(subject => (
+                  <div key={subject.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={subject.id}
+                      checked={subjects.includes(subject.id)}
+                      onChange={() => toggleSubject(subject.id)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                      {subject.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ) : (
-        <p className="text-gray-500 italic">No subjects added yet. Add your IB subjects to start tracking past papers.</p>
       )}
     </div>
   );
@@ -484,6 +491,7 @@ const PaperTracking = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeYears, setActiveYears] = useState({});
   
   const years = [2019, 2020, 2021, 2022, 2023, 2024];
   const sessions = ['May', 'November'];
@@ -496,11 +504,19 @@ const PaperTracking = () => {
       axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
     ])
       .then(([subjectsResponse, completionResponse]) => {
-        setSubjects(subjectsResponse.data.subjects || []);
+        const userSubjects = subjectsResponse.data.subjects || [];
+        setSubjects(userSubjects);
         setCompletionStatus(completionResponse.data || {});
-        if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
-          setSelectedSubject(subjectsResponse.data.subjects[0]);
+        if (userSubjects.length > 0) {
+          setSelectedSubject(userSubjects[0]);
         }
+        
+        // Initialize all years as collapsed
+        const yearsState = {};
+        years.forEach(year => {
+          yearsState[year] = false;
+        });
+        setActiveYears(yearsState);
       })
       .catch(err => {
         console.error('Error fetching data:', err);
@@ -577,111 +593,40 @@ const PaperTracking = () => {
       percentage: total > 0 ? Math.round((completed / total) * 100) : 0
     };
   };
+
+  // Toggle year accordion
+  const toggleYear = (year) => {
+    setActiveYears({
+      ...activeYears,
+      [year]: !activeYears[year]
+    });
+  };
+
+  // Calculate year completion
+  const calculateYearCompletion = (year) => {
+    if (!selectedSubject) return { completed: 0, total: 0, percentage: 0 };
+    
+    let completed = 0;
+    let total = 0;
+    
+    sessions.forEach(session => {
+      const papersToCheck = selectedSubject.includes('_hl') ? papers : papers.slice(0, 2);
+      papersToCheck.forEach(paper => {
+        total++;
+        if (getPaperStatus(selectedSubject, year, session, paper)) {
+          completed++;
+        }
+      });
+    });
+    
+    return {
+      completed,
+      total,
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+    };
+  };
   
   const stats = calculateStats();
-
-  if (loading) {
-    return <div className="text-center py-4">Loading your papers...</div>;
-  }
-
-  if (subjects.length === 0) {
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
-        <p className="text-gray-500">Please add subjects first to start tracking papers.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
-      
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
-      
-      <div className="mb-6">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          Select Subject to View
-        </label>
-        <select
-          className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
-        >
-          {subjects.map(subject => (
-            <option key={subject} value={subject}>
-              {getSubjectName(subject)}
-            </option>
-          ))}
-        </select>
-      </div>
-      
-      {selectedSubject && (
-        <>
-          <div className="mb-6 bg-blue-50 p-4 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Completion Status</h3>
-            <div className="flex items-center">
-              <div className="w-full bg-gray-200 rounded-full h-4 mr-4">
-                <div 
-                  className="bg-blue-600 h-4 rounded-full" 
-                  style={{ width: `${stats.percentage}%` }}
-                ></div>
-              </div>
-              <span className="text-sm font-medium">{stats.percentage}%</span>
-            </div>
-            <p className="text-sm mt-2">
-              {stats.completed} of {stats.total} papers completed
-            </p>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 1</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 2</th>
-                  {selectedSubject.includes('_hl') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 3</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {years.map(year => 
-                  sessions.map((session, sessionIndex) => (
-                    <tr key={`${year}-${session}`} className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
-                      {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
-                        <td key={`${year}-${session}-${paper}`} className="px-6 py-4 whitespace-nowrap">
-                          <label className="inline-flex items-center">
-                            <input
-                              type="checkbox"
-                              className="form-checkbox h-5 w-5 text-blue-600"
-                              checked={getPaperStatus(selectedSubject, year, session, paper)}
-                              onChange={() => updatePaperStatus(
-                                selectedSubject,
-                                year,
-                                session,
-                                paper,
-                                getPaperStatus(selectedSubject, year, session, paper)
-                              )}
-                            />
-                            <span className="ml-2 text-sm text-gray-700">Completed</span>
-                          </label>
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-    </div>
-  );
 };
 
 // Dashboard Component
