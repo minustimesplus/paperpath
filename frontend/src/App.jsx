@@ -290,54 +290,32 @@ const SubjectSelection = ({ onSubjectsChange }) => {
   const { token } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [availableSubjects, setAvailableSubjects] = useState([
-    // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL', group: 1 },
-    { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
-    { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
-    
-    // Group 2: Language Acquisition
-    { id: 'english_b_sl', name: 'English B SL', group: 2 },
-    { id: 'english_b_hl', name: 'English B HL', group: 2 },
-    { id: 'french_b_sl', name: 'French B SL', group: 2 },
-    { id: 'french_b_hl', name: 'French B HL', group: 2 },
-    { id: 'spanish_b_sl', name: 'Spanish B SL', group: 2 },
-    { id: 'spanish_b_hl', name: 'Spanish B HL', group: 2 },
-    { id: 'german_b_sl', name: 'German B SL', group: 2 },
-    { id: 'german_b_hl', name: 'German B HL', group: 2 },
-    
-    // Group 3: Individuals and Societies
-    { id: 'economics_sl', name: 'Economics SL', group: 3 },
-    { id: 'economics_hl', name: 'Economics HL', group: 3 },
-    { id: 'history_sl', name: 'History SL', group: 3 },
-    { id: 'history_hl', name: 'History HL', group: 3 },
-    { id: 'psychology_sl', name: 'Psychology SL', group: 3 },
-    { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
-    { id: 'geography_sl', name: 'Geography SL', group: 3 },
-    { id: 'geography_hl', name: 'Geography HL', group: 3 },
-    
-    // Group 4: Sciences
-    { id: 'physics_sl', name: 'Physics SL', group: 4 },
-    { id: 'physics_hl', name: 'Physics HL', group: 4 },
-    { id: 'chemistry_sl', name: 'Chemistry SL', group: 4 },
-    { id: 'chemistry_hl', name: 'Chemistry HL', group: 4 },
-    { id: 'biology_sl', name: 'Biology SL', group: 4 },
-    { id: 'biology_hl', name: 'Biology HL', group: 4 },
-    { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
-    { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
-    { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
-    
-    // Group 5: Mathematics
-    { id: 'math_aa_sl', name: 'Mathematics AA SL', group: 5 },
-    { id: 'math_aa_hl', name: 'Mathematics AA HL', group: 5 },
-    { id: 'math_ai_sl', name: 'Mathematics AI SL', group: 5 },
-    { id: 'math_ai_hl', name: 'Mathematics AI HL', group: 5 },
-    
-    // Group 6: The Arts
-    { id: 'visual_arts_sl', name: 'Visual Arts SL', group: 6 },
-    { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 },
-    { id: 'design_tech_sl', name: 'Design Technology SL', group: 6 },
-    { id: 'design_tech_hl', name: 'Design Technology HL', group: 6 }
+    { id: 'math_aa_sl', name: 'Mathematics AA SL' },
+    { id: 'math_aa_hl', name: 'Mathematics AA HL' },
+    { id: 'math_ai_sl', name: 'Mathematics AI SL' },
+    { id: 'math_ai_hl', name: 'Mathematics AI HL' },
+    { id: 'physics_sl', name: 'Physics SL' },
+    { id: 'physics_hl', name: 'Physics HL' },
+    { id: 'chemistry_sl', name: 'Chemistry SL' },
+    { id: 'chemistry_hl', name: 'Chemistry HL' },
+    { id: 'biology_sl', name: 'Biology SL' },
+    { id: 'biology_hl', name: 'Biology HL' },
+    { id: 'english_a_sl', name: 'English A Lit SL' },
+    { id: 'english_a_hl', name: 'English A Lit HL' },
+    { id: 'english_b_sl', name: 'English B SL' },
+    { id: 'english_b_hl', name: 'English B HL' },
+    { id: 'french_b_sl', name: 'French B SL' },
+    { id: 'french_b_hl', name: 'French B HL' },
+    { id: 'spanish_b_sl', name: 'Spanish B SL' },
+    { id: 'spanish_b_hl', name: 'Spanish B HL' },
+    { id: 'economics_sl', name: 'Economics SL' },
+    { id: 'economics_hl', name: 'Economics HL' },
+    { id: 'history_sl', name: 'History SL' },
+    { id: 'history_hl', name: 'History HL' },
+    { id: 'psychology_sl', name: 'Psychology SL' },
+    { id: 'psychology_hl', name: 'Psychology HL' },
+    { id: 'computer_science_sl', name: 'Computer Science SL' },
+    { id: 'computer_science_hl', name: 'Computer Science HL' },
   ]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -493,8 +471,8 @@ const PaperTracking = () => {
     { id: 'chemistry_hl', name: 'Chemistry HL' },
     { id: 'biology_sl', name: 'Biology SL' },
     { id: 'biology_hl', name: 'Biology HL' },
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL' },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL' },
+    { id: 'english_a_sl', name: 'English A Lit SL' },
+    { id: 'english_a_hl', name: 'English A Lit HL' },
     { id: 'english_b_sl', name: 'English B SL' },
     { id: 'english_b_hl', name: 'English B HL' },
     { id: 'french_b_sl', name: 'French B SL' },
