@@ -170,8 +170,6 @@ const Login = () => {
   );
 };
 
-
-// have to test github
 // Register Component
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -291,14 +289,93 @@ const Register = () => {
 const SubjectSelection = ({ onSubjectsChange }) => {
   const { token } = useAuth();
   const [subjects, setSubjects] = useState([]);
-  const [availableSubjects, setAvailableSubjects] = useState([
-    // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL', group: 1 },
+  const [subjectGroups, setSubjectGroups] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch user's subjects and subject groups
+    Promise.all([
+      axios.get(`${API_URL}/subjects`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      axios.get(`${API_URL}/subject-groups`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    ])
+      .then(([subjectsResponse, groupsResponse]) => {
+        setSubjects(subjectsResponse.data.subjects || []);
+        
+        if (groupsResponse.data.subject_groups) {
+          setSubjectGroups(groupsResponse.data.subject_groups);
+        } else {
+          // Fallback to hardcoded subject groups if API doesn't return them
+          setSubjectGroups({
+            "Group 1 - Studies in Language and Literature": [
+              "English A Literature", "English A Language and Literature", "German A"
+            ],
+            "Group 2 - Language Acquisition": [
+              "English B", "French B", "Spanish B", "German B", "Mandarin B"
+            ],
+            "Group 3 - Individuals and Societies": [
+              "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)"
+            ],
+            "Group 4 - Sciences": [
+              "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)"
+            ],
+            "Group 5 - Mathematics": [
+              "Mathematics: Analysis and Approaches", "Mathematics: Applications and Interpretation"
+            ],
+            "Group 6 - The Arts": [
+              "Visual Arts", "Music", "Theatre", "Film", "Dance", "Design"
+            ]
+          });
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching data:', err);
+        setError('Error loading subject groups');
+        
+        // Fallback to hardcoded if API fails
+        setSubjectGroups({
+          "Group 1 - Studies in Language and Literature": [
+            "English A Literature", "English A Language and Literature", "German A"
+          ],
+          "Group 2 - Language Acquisition": [
+            "English B", "French B", "Spanish B", "German B", "Mandarin B"
+          ],
+          "Group 3 - Individuals and Societies": [
+            "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)"
+          ],
+          "Group 4 - Sciences": [
+            "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)"
+          ],
+          "Group 5 - Mathematics": [
+            "Mathematics: Analysis and Approaches", "Mathematics: Applications and Interpretation"
+          ],
+          "Group 6 - The Arts": [
+            "Visual Arts", "Music", "Theatre", "Film", "Dance", "Design"
+          ]
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [token]);
+
+  // List of all available subjects with their IDs
+  const availableSubjects = [
+    // Group 1 - Studies in Language and Literature
+    { id: 'english_a_literature_sl', name: 'English A Literature SL', group: 1 },
+    { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
+    { id: 'english_a_lang_lit_sl', name: 'English A Lang & Lit SL', group: 1 },
+    { id: 'english_a_lang_lit_hl', name: 'English A Lang & Lit HL', group: 1 },
     { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
     { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
     
-    // Group 2: Language Acquisition
+    // Group 2 - Language Acquisition
     { id: 'english_b_sl', name: 'English B SL', group: 2 },
     { id: 'english_b_hl', name: 'English B HL', group: 2 },
     { id: 'french_b_sl', name: 'French B SL', group: 2 },
@@ -308,7 +385,7 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'german_b_sl', name: 'German B SL', group: 2 },
     { id: 'german_b_hl', name: 'German B HL', group: 2 },
     
-    // Group 3: Individuals and Societies
+    // Group 3 - Individuals and Societies
     { id: 'economics_sl', name: 'Economics SL', group: 3 },
     { id: 'economics_hl', name: 'Economics HL', group: 3 },
     { id: 'history_sl', name: 'History SL', group: 3 },
@@ -317,8 +394,9 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
     { id: 'geography_sl', name: 'Geography SL', group: 3 },
     { id: 'geography_hl', name: 'Geography HL', group: 3 },
+    { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 3 },
     
-    // Group 4: Sciences
+    // Group 4 - Sciences
     { id: 'physics_sl', name: 'Physics SL', group: 4 },
     { id: 'physics_hl', name: 'Physics HL', group: 4 },
     { id: 'chemistry_sl', name: 'Chemistry SL', group: 4 },
@@ -327,36 +405,19 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'biology_hl', name: 'Biology HL', group: 4 },
     { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
     { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
-    { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
     
-    // Group 5: Mathematics
+    // Group 5 - Mathematics
     { id: 'math_aa_sl', name: 'Mathematics AA SL', group: 5 },
     { id: 'math_aa_hl', name: 'Mathematics AA HL', group: 5 },
     { id: 'math_ai_sl', name: 'Mathematics AI SL', group: 5 },
     { id: 'math_ai_hl', name: 'Mathematics AI HL', group: 5 },
     
-    // Group 6: The Arts
+    // Group 6 - The Arts
     { id: 'visual_arts_sl', name: 'Visual Arts SL', group: 6 },
     { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 },
     { id: 'design_tech_sl', name: 'Design Technology SL', group: 6 },
     { id: 'design_tech_hl', name: 'Design Technology HL', group: 6 }
-  ]);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    // Fetch user's subjects
-    axios.get(`${API_URL}/subjects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        setSubjects(response.data.subjects || []);
-      })
-      .catch(err => {
-        console.error('Error fetching subjects:', err);
-      });
-  }, [token]);
+  ];
 
   const toggleSubject = (subjectId) => {
     let newSubjects;
@@ -392,31 +453,21 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     return subject ? subject.name : subjectId;
   };
 
-  // Group subjects by category
-  const groupedSubjects = {
-    'Mathematics': availableSubjects.filter(s => s.id.startsWith('math_')),
-    'Sciences': availableSubjects.filter(s => 
-      s.id.startsWith('physics_') || 
-      s.id.startsWith('chemistry_') || 
-      s.id.startsWith('biology_') || 
-      s.id.startsWith('computer_science_')
-    ),
-    'Languages': availableSubjects.filter(s => 
-      s.id.startsWith('english_') || 
-      s.id.startsWith('french_') || 
-      s.id.startsWith('spanish_')
-    ),
-    'Humanities': availableSubjects.filter(s => 
-      s.id.startsWith('economics_') || 
-      s.id.startsWith('history_') || 
-      s.id.startsWith('psychology_')
-    )
+  if (loading) {
+    return <div className="bg-white p-6 rounded-lg shadow-md">
+      <p className="text-gray-500">Loading subjects...</p>
+    </div>;
+  }
+
+  // Group subjects according to IB groups
+  const getSubjectsByGroupNumber = (groupNumber) => {
+    return availableSubjects.filter(s => s.group === groupNumber);
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">My Subjects</h2>
+        <h2 className="text-xl font-semibold">My IB Subjects</h2>
         <button 
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
@@ -452,27 +503,131 @@ const SubjectSelection = ({ onSubjectsChange }) => {
         <div className="mt-6 border-t pt-4">
           <h3 className="text-lg font-medium mb-4">Select Your IB Subjects:</h3>
           
-          {Object.entries(groupedSubjects).map(([category, subjectList]) => (
-            <div key={category} className="mb-6">
-              <h4 className="text-md font-medium text-gray-700 mb-2">{category}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {subjectList.map(subject => (
-                  <div key={subject.id} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={subject.id}
-                      checked={subjects.includes(subject.id)}
-                      onChange={() => toggleSubject(subject.id)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
-                      {subject.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
+          {/* Group 1 - Studies in Language and Literature */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 1 - Studies in Language and Literature</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(1).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          
+          {/* Group 2 - Language Acquisition */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 2 - Language Acquisition</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(2).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Group 3 - Individuals and Societies */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 3 - Individuals and Societies</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(3).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Group 4 - Sciences */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 4 - Sciences</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(4).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Group 5 - Mathematics */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 5 - Mathematics</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(5).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Group 6 - The Arts */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-700 mb-2">Group 6 - The Arts</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {getSubjectsByGroupNumber(6).map(subject => (
+                <div key={subject.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={subject.id}
+                    checked={subjects.includes(subject.id)}
+                    onChange={() => toggleSubject(subject.id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    {subject.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -484,34 +639,7 @@ const PaperTracking = () => {
   const { token } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
-  const [availableSubjects, setAvailableSubjects] = useState([
-    { id: 'math_aa_sl', name: 'Mathematics AA SL' },
-    { id: 'math_aa_hl', name: 'Mathematics AA HL' },
-    { id: 'math_ai_sl', name: 'Mathematics AI SL' },
-    { id: 'math_ai_hl', name: 'Mathematics AI HL' },
-    { id: 'physics_sl', name: 'Physics SL' },
-    { id: 'physics_hl', name: 'Physics HL' },
-    { id: 'chemistry_sl', name: 'Chemistry SL' },
-    { id: 'chemistry_hl', name: 'Chemistry HL' },
-    { id: 'biology_sl', name: 'Biology SL' },
-    { id: 'biology_hl', name: 'Biology HL' },
-    { id: 'english_a_sl', name: 'English A Lang & Lit SL' },
-    { id: 'english_a_hl', name: 'English A Lang & Lit HL' },
-    { id: 'english_b_sl', name: 'English B SL' },
-    { id: 'english_b_hl', name: 'English B HL' },
-    { id: 'french_b_sl', name: 'French B SL' },
-    { id: 'french_b_hl', name: 'French B HL' },
-    { id: 'spanish_b_sl', name: 'Spanish B SL' },
-    { id: 'spanish_b_hl', name: 'Spanish B HL' },
-    { id: 'economics_sl', name: 'Economics SL' },
-    { id: 'economics_hl', name: 'Economics HL' },
-    { id: 'history_sl', name: 'History SL' },
-    { id: 'history_hl', name: 'History HL' },
-    { id: 'psychology_sl', name: 'Psychology SL' },
-    { id: 'psychology_hl', name: 'Psychology HL' },
-    { id: 'computer_science_sl', name: 'Computer Science SL' },
-    { id: 'computer_science_hl', name: 'Computer Science HL' },
-  ]);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -521,16 +649,19 @@ const PaperTracking = () => {
   const papers = ['Paper 1', 'Paper 2', 'Paper 3'];
 
   useEffect(() => {
-    // Fetch user's subjects
+    // Fetch user's subjects and completion status
     Promise.all([
       axios.get(`${API_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } }),
       axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
     ])
       .then(([subjectsResponse, completionResponse]) => {
-        setSubjects(subjectsResponse.data.subjects || []);
+        const userSubjects = subjectsResponse.data.subjects || [];
+        setSubjects(userSubjects);
         setCompletionStatus(completionResponse.data || {});
-        if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
-          setSelectedSubject(subjectsResponse.data.subjects[0]);
+        
+        // Set the first subject as selected by default
+        if (userSubjects.length > 0) {
+          setSelectedSubject(userSubjects[0]);
         }
       })
       .catch(err => {
@@ -715,68 +846,3 @@ const PaperTracking = () => {
     </div>
   );
 };
-
-// Dashboard Component
-const Dashboard = () => {
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
-  const [subjectsUpdated, setSubjectsUpdated] = useState(false);
-
-  // Function to trigger update in the PaperTracking component
-  const handleSubjectsChange = () => {
-    setSubjectsUpdated(prev => !prev);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">IB Paper Tracker</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">Hello, {currentUser?.username}</span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-      
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-6">
-          <SubjectSelection onSubjectsChange={handleSubjectsChange} />
-          <PaperTracking key={subjectsUpdated} />
-        </div>
-      </main>
-    </div>
-  );
-};
-
-// App Component
-const App = () => {
-  return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-};
-
-export default App;
