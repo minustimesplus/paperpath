@@ -29,30 +29,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# PostgreSQL connection parameters
-PG_USER = os.getenv("user", "postgres")
-PG_PASSWORD = os.getenv("password", "")
-PG_HOST = os.getenv("host", "")
-PG_PORT = os.getenv("port", "5432")
-PG_DBNAME = os.getenv("dbname", "postgres")
+# Database connection string from .env
+# DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/postgres")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # SQLAlchemy setup
-# DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
-DATABASE_URL = "postgresql://neondb_owner:npg_b5C1sqJGtngN@ep-plain-union-a9t22r24-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
-
 engine = create_engine(DATABASE_URL)
 
 # Initialize database
 def init_db():
     try:
         # Connect to PostgreSQL
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -102,13 +90,7 @@ def init_db():
 @app.on_event("startup")
 async def startup_event():
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         conn.close()
         print("Successfully connected to PostgreSQL database!")
     except Exception as e:
@@ -121,7 +103,7 @@ async def startup_event():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-for-development")  # Change in production
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-for-development")  # Change in production
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 
@@ -160,13 +142,7 @@ def get_password_hash(password):
 
 def get_user(username: str):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         cursor.execute("SELECT id, username, email, password_hash FROM users WHERE username = %s", (username,))
         user_data = cursor.fetchone()
@@ -225,13 +201,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.post("/register", response_model=Token)
 async def register_user(user: User):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -304,13 +274,7 @@ async def read_users_me(current_user: UserInDB = Depends(get_current_user)):
 @app.post("/subjects")
 async def save_subjects(subject_list: SubjectList, current_user: UserInDB = Depends(get_current_user)):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -345,13 +309,7 @@ async def save_subjects(subject_list: SubjectList, current_user: UserInDB = Depe
 @app.get("/subjects")
 async def get_subjects(current_user: UserInDB = Depends(get_current_user)):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         
         cursor.execute("SELECT subjects FROM user_subjects WHERE user_id = %s", (current_user.id,))
@@ -375,13 +333,7 @@ async def get_subjects(current_user: UserInDB = Depends(get_current_user)):
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -430,13 +382,7 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
 @app.get("/completion")
 async def get_completion(current_user: UserInDB = Depends(get_current_user)):
     try:
-        conn = psycopg2.connect(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            host=PG_HOST,
-            port=PG_PORT,
-            dbname=PG_DBNAME
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         
         cursor.execute(
