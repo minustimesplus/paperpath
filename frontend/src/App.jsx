@@ -846,3 +846,5 @@ const PaperTracking = () => {
     </div>
   );
 };
+
+export default App;
