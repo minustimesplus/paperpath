@@ -6,7 +6,6 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
-import sqlite3
 import os
 import json
 import psycopg2
@@ -30,10 +29,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection parameters
-DB_NAME = "ib_tracker.db"
-USE_POSTGRESQL = os.getenv("USE_POSTGRESQL", "false").lower() == "true"
-
 # PostgreSQL connection parameters
 PG_USER = os.getenv("user", "postgres")
 PG_PASSWORD = os.getenv("password", "")
@@ -42,78 +37,27 @@ PG_PORT = os.getenv("port", "5432")
 PG_DBNAME = os.getenv("dbname", "postgres")
 
 # SQLAlchemy setup
-if USE_POSTGRESQL:
-    DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
-    engine = create_engine(DATABASE_URL)
-else:
-    DATABASE_URL = "sqlite:///./ib_tracker.db"
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
+engine = create_engine(DATABASE_URL)
 
 # Initialize database
 def init_db():
-    if USE_POSTGRESQL:
-        try:
-            # Connect to PostgreSQL
-            conn = psycopg2.connect(
-                user=PG_USER,
-                password=PG_PASSWORD,
-                host=PG_HOST,
-                port=PG_PORT,
-                dbname=PG_DBNAME
-            )
-            conn.autocommit = True
-            cursor = conn.cursor()
-            
-            # Create users table
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            ''')
-            
-            # Create subjects table
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_subjects (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                subjects TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-            ''')
-            
-            # Create completion status table
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS completion_status (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                subject_id TEXT NOT NULL,
-                year INTEGER NOT NULL,
-                session TEXT NOT NULL,
-                paper TEXT NOT NULL,
-                is_completed BOOLEAN NOT NULL DEFAULT FALSE,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-            ''')
-            
-            cursor.close()
-            conn.close()
-            print("PostgreSQL database initialized successfully")
-        except Exception as e:
-            print(f"Error initializing PostgreSQL database: {e}")
-    else:
-        # SQLite initialization
-        conn = sqlite3.connect(DB_NAME)
+    try:
+        # Connect to PostgreSQL
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        conn.autocommit = True
         cursor = conn.cursor()
         
         # Create users table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
@@ -124,7 +68,7 @@ def init_db():
         # Create subjects table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS user_subjects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
             subjects TEXT NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users (id)
@@ -134,47 +78,43 @@ def init_db():
         # Create completion status table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS completion_status (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
             subject_id TEXT NOT NULL,
             year INTEGER NOT NULL,
             session TEXT NOT NULL,
             paper TEXT NOT NULL,
-            is_completed BOOLEAN NOT NULL DEFAULT 0,
+            is_completed BOOLEAN NOT NULL DEFAULT FALSE,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
         ''')
         
-        conn.commit()
+        cursor.close()
         conn.close()
-        print("SQLite database initialized successfully")
+        print("PostgreSQL database initialized successfully")
+    except Exception as e:
+        print(f"Error initializing PostgreSQL database: {e}")
 
 # Test database connection at startup
 @app.on_event("startup")
 async def startup_event():
-    if USE_POSTGRESQL:
-        try:
-            conn = psycopg2.connect(
-                user=PG_USER,
-                password=PG_PASSWORD,
-                host=PG_HOST,
-                port=PG_PORT,
-                dbname=PG_DBNAME
-            )
-            conn.close()
-            print("Successfully connected to PostgreSQL database!")
-        except Exception as e:
-            print(f"PostgreSQL connection error: {e}")
-            print("Falling back to SQLite...")
-            global USE_POSTGRESQL
-            USE_POSTGRESQL = False
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        conn.close()
+        print("Successfully connected to PostgreSQL database!")
+    except Exception as e:
+        print(f"PostgreSQL connection error: {e}")
     
     # Initialize database
     init_db()
 
-# Rest of your code...
-# (Keep the existing code for security setup, models, helper functions, and routes)
 # Security setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -217,18 +157,26 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user(username: str):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-    user = cursor.fetchone()
-    
-    conn.close()
-    
-    if user:
-        return UserInDB(**dict(user))
-    return None
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, email, password_hash FROM users WHERE username = %s", (username,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if user_data:
+            return UserInDB(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3])
+        return None
+    except Exception as e:
+        print(f"Error getting user from PostgreSQL: {e}")
+        return None
 
 def authenticate_user(username: str, password: str):
     user = get_user(username)
@@ -274,48 +222,61 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 # Routes
 @app.post("/register", response_model=Token)
 async def register_user(user: User):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    # Check if username already exists
-    cursor.execute("SELECT id FROM users WHERE username = ?", (user.username,))
-    if cursor.fetchone():
-        conn.close()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered"
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
         )
-    
-    # Check if email already exists
-    cursor.execute("SELECT id FROM users WHERE email = ?", (user.email,))
-    if cursor.fetchone():
-        conn.close()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # Check if username already exists
+        cursor.execute("SELECT id FROM users WHERE username = %s", (user.username,))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already registered"
+            )
+        
+        # Check if email already exists
+        cursor.execute("SELECT id FROM users WHERE email = %s", (user.email,))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Create new user
+        hashed_password = get_password_hash(user.password)
+        cursor.execute(
+            "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
+            (user.username, user.email, hashed_password)
         )
-    
-    # Create new user
-    hashed_password = get_password_hash(user.password)
-    cursor.execute(
-        "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-        (user.username, user.email, hashed_password)
-    )
-    conn.commit()
-    
-    # Get the user id
-    cursor.execute("SELECT id FROM users WHERE username = ?", (user.username,))
-    user_id = cursor.fetchone()[0]
-    
-    conn.close()
-    
-    # Create access token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer"}
+        user_id = cursor.fetchone()[0]
+        
+        cursor.close()
+        conn.close()
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.username}, expires_delta=access_token_expires
+        )
+        
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        print(f"Error registering user: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error registering user"
+        )
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -340,112 +301,167 @@ async def read_users_me(current_user: UserInDB = Depends(get_current_user)):
 
 @app.post("/subjects")
 async def save_subjects(subject_list: SubjectList, current_user: UserInDB = Depends(get_current_user)):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    # Check if user already has subjects saved
-    cursor.execute("SELECT id FROM user_subjects WHERE user_id = ?", (current_user.id,))
-    existing = cursor.fetchone()
-    
-    if existing:
-        # Update existing subjects
-        cursor.execute(
-            "UPDATE user_subjects SET subjects = ? WHERE user_id = ?",
-            (json.dumps(subject_list.subjects), current_user.id)
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
         )
-    else:
-        # Create new subjects entry
-        cursor.execute(
-            "INSERT INTO user_subjects (user_id, subjects) VALUES (?, ?)",
-            (current_user.id, json.dumps(subject_list.subjects))
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # Check if user already has subjects saved
+        cursor.execute("SELECT id FROM user_subjects WHERE user_id = %s", (current_user.id,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing subjects
+            cursor.execute(
+                "UPDATE user_subjects SET subjects = %s WHERE user_id = %s",
+                (json.dumps(subject_list.subjects), current_user.id)
+            )
+        else:
+            # Create new subjects entry
+            cursor.execute(
+                "INSERT INTO user_subjects (user_id, subjects) VALUES (%s, %s)",
+                (current_user.id, json.dumps(subject_list.subjects))
+            )
+        
+        cursor.close()
+        conn.close()
+        
+        return {"status": "success", "message": "Subjects saved successfully"}
+    except Exception as e:
+        print(f"Error saving subjects: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error saving subjects"
         )
-    
-    conn.commit()
-    conn.close()
-    
-    return {"status": "success", "message": "Subjects saved successfully"}
 
 @app.get("/subjects")
 async def get_subjects(current_user: UserInDB = Depends(get_current_user)):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT subjects FROM user_subjects WHERE user_id = ?", (current_user.id,))
-    result = cursor.fetchone()
-    
-    conn.close()
-    
-    if result:
-        subjects = json.loads(result[0])
-        return {"subjects": subjects}
-    else:
-        return {"subjects": []}
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT subjects FROM user_subjects WHERE user_id = %s", (current_user.id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            subjects = json.loads(result[0])
+            return {"subjects": subjects}
+        else:
+            return {"subjects": []}
+    except Exception as e:
+        print(f"Error getting subjects: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving subjects"
+        )
 
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    # Check if this specific paper status already exists
-    cursor.execute(
-        """
-        SELECT id FROM completion_status 
-        WHERE user_id = ? AND subject_id = ? AND year = ? AND session = ? AND paper = ?
-        """, 
-        (current_user.id, status.subject_id, status.year, status.session, status.paper)
-    )
-    existing = cursor.fetchone()
-    
-    if existing:
-        # Update existing status
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # Check if this specific paper status already exists
         cursor.execute(
             """
-            UPDATE completion_status 
-            SET is_completed = ?, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-            """,
-            (status.is_completed, existing[0])
+            SELECT id FROM completion_status 
+            WHERE user_id = %s AND subject_id = %s AND year = %s AND session = %s AND paper = %s
+            """, 
+            (current_user.id, status.subject_id, status.year, status.session, status.paper)
         )
-    else:
-        # Create new status
-        cursor.execute(
-            """
-            INSERT INTO completion_status 
-            (user_id, subject_id, year, session, paper, is_completed) 
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (current_user.id, status.subject_id, status.year, status.session, status.paper, status.is_completed)
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing status
+            cursor.execute(
+                """
+                UPDATE completion_status 
+                SET is_completed = %s, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = %s
+                """,
+                (status.is_completed, existing[0])
+            )
+        else:
+            # Create new status
+            cursor.execute(
+                """
+                INSERT INTO completion_status 
+                (user_id, subject_id, year, session, paper, is_completed) 
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (current_user.id, status.subject_id, status.year, status.session, status.paper, status.is_completed)
+            )
+        
+        cursor.close()
+        conn.close()
+        
+        return {"status": "success"}
+    except Exception as e:
+        print(f"Error updating completion status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating completion status"
         )
-    
-    conn.commit()
-    conn.close()
-    
-    return {"status": "success"}
 
 @app.get("/completion")
 async def get_completion(current_user: UserInDB = Depends(get_current_user)):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    cursor.execute(
-        """
-        SELECT subject_id, year, session, paper, is_completed 
-        FROM completion_status 
-        WHERE user_id = ?
-        """, 
-        (current_user.id,)
-    )
-    
-    results = cursor.fetchall()
-    conn.close()
-    
-    completion_data = {}
-    for row in results:
-        key = f"{row['subject_id']}-{row['year']}-{row['session']}-{row['paper']}"
-        completion_data[key] = row['is_completed']
-    
-    return completion_data
+    try:
+        conn = psycopg2.connect(
+            user=PG_USER,
+            password=PG_PASSWORD,
+            host=PG_HOST,
+            port=PG_PORT,
+            dbname=PG_DBNAME
+        )
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """
+            SELECT subject_id, year, session, paper, is_completed 
+            FROM completion_status 
+            WHERE user_id = %s
+            """, 
+            (current_user.id,)
+        )
+        
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        completion_data = {}
+        for row in results:
+            key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}"
+            completion_data[key] = row[4]
+        
+        return completion_data
+    except Exception as e:
+        print(f"Error getting completion data: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving completion data"
+        )
 
 # Run the application
 if __name__ == "__main__":
