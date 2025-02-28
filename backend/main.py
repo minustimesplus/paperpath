@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -10,12 +9,13 @@ from passlib.context import CryptContext
 import sqlite3
 import os
 import json
+import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-import psycopg2
 
+# Load environment variables from .env
 load_dotenv()
 
 # Initialize FastAPI
@@ -30,32 +30,82 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database setup
+# Database connection parameters
 DB_NAME = "ib_tracker.db"
+USE_POSTGRESQL = os.getenv("USE_POSTGRESQL", "false").lower() == "true"
 
-import os
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+# PostgreSQL connection parameters
+PG_USER = os.getenv("user", "postgres")
+PG_PASSWORD = os.getenv("password", "")
+PG_HOST = os.getenv("host", "")
+PG_PORT = os.getenv("port", "5432")
+PG_DBNAME = os.getenv("dbname", "postgres")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ib_tracker.db")
-# For SQLite local development
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    # For PostgreSQL production
+# SQLAlchemy setup
+if USE_POSTGRESQL:
+    DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
     engine = create_engine(DATABASE_URL)
+else:
+    DATABASE_URL = "sqlite:///./ib_tracker.db"
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-# Create a SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Create a Base class
-Base = declarative_base()
-
-
-
+# Initialize database
 def init_db():
-    if DATABASE_URL.startswith("sqlite"):
+    if USE_POSTGRESQL:
+        try:
+            # Connect to PostgreSQL
+            conn = psycopg2.connect(
+                user=PG_USER,
+                password=PG_PASSWORD,
+                host=PG_HOST,
+                port=PG_PORT,
+                dbname=PG_DBNAME
+            )
+            conn.autocommit = True
+            cursor = conn.cursor()
+            
+            # Create users table
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+            
+            # Create subjects table
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_subjects (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                subjects TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+            ''')
+            
+            # Create completion status table
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS completion_status (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                subject_id TEXT NOT NULL,
+                year INTEGER NOT NULL,
+                session TEXT NOT NULL,
+                paper TEXT NOT NULL,
+                is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+            ''')
+            
+            cursor.close()
+            conn.close()
+            print("PostgreSQL database initialized successfully")
+        except Exception as e:
+            print(f"Error initializing PostgreSQL database: {e}")
+    else:
         # SQLite initialization
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
@@ -98,56 +148,33 @@ def init_db():
         
         conn.commit()
         conn.close()
-    else:
-        # PostgreSQL initialization
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
-        cursor = conn.cursor()
-        
-        # Create users table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
-        
-        # Create subjects table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_subjects (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            subjects TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-        ''')
-        
-        # Create completion status table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS completion_status (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            subject_id TEXT NOT NULL,
-            year INTEGER NOT NULL,
-            session TEXT NOT NULL,
-            paper TEXT NOT NULL,
-            is_completed BOOLEAN NOT NULL DEFAULT FALSE,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-        ''')
-        
-        cursor.close()
-        conn.close()
+        print("SQLite database initialized successfully")
 
-# Initialize database on startup
+# Test database connection at startup
 @app.on_event("startup")
 async def startup_event():
+    if USE_POSTGRESQL:
+        try:
+            conn = psycopg2.connect(
+                user=PG_USER,
+                password=PG_PASSWORD,
+                host=PG_HOST,
+                port=PG_PORT,
+                dbname=PG_DBNAME
+            )
+            conn.close()
+            print("Successfully connected to PostgreSQL database!")
+        except Exception as e:
+            print(f"PostgreSQL connection error: {e}")
+            print("Falling back to SQLite...")
+            global USE_POSTGRESQL
+            USE_POSTGRESQL = False
+    
+    # Initialize database
     init_db()
 
+# Rest of your code...
+# (Keep the existing code for security setup, models, helper functions, and routes)
 # Security setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
