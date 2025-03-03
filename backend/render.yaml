@@ -6,6 +6,6 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        value: sqlite:///./ib_tracker.db
+        value: DATABASE_URL=postgresql://neondb_owner:npg_b5C1sqJGtngN@ep-plain-union-a9t22r24-pooler.gwc.azure.neon.tech/neondb?sslmode=require
       - key: SECRET_KEY
         generateValue: true
