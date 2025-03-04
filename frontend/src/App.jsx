@@ -15,7 +15,7 @@ const TimezoneConfigProvider = ({ children }) => {
 
   useEffect(() => {
     // Fetch the timezone configuration from the JSON file
-    fetch('/timezone-config.json')
+    fetch('timezone-config.json')
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to load timezone configuration: ${response.status} ${response.statusText}`);
