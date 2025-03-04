@@ -12,6 +12,6 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
   },
-  root: './', // Ensure root is set to the correct directory
-  publicDir: 'public',
+  root: resolve(__dirname, './'), // Ensure root is set to the correct directory
+  publicDir: resolve(__dirname, 'public'), // Ensure publicDir is set to the correct directory
 });
