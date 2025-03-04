@@ -497,7 +497,6 @@ const PaperTracking = () => {
   const { token } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
-  const [scoreData, setScoreData] = useState({});
   const [availableSubjects, setAvailableSubjects] = useState([
     // Group 1: Studies in Language and Literature
     { id: 'english_a_sl', name: 'English A Lit SL', group: 1 },
@@ -551,8 +550,6 @@ const PaperTracking = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showScoreInput, setShowScoreInput] = useState({});
-  const [tempScores, setTempScores] = useState({});
   
   const years = [2019, 2020, 2021, 2022, 2023, 2024];
   const sessions = ['May', 'November'];
@@ -566,8 +563,7 @@ const PaperTracking = () => {
     ])
       .then(([subjectsResponse, completionResponse]) => {
         setSubjects(subjectsResponse.data.subjects || []);
-        setCompletionStatus(completionResponse.data.completion || {});
-        setScoreData(completionResponse.data.scores || {});
+        setCompletionStatus(completionResponse.data || {});
         if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
           setSelectedSubject(subjectsResponse.data.subjects[0]);
         }
@@ -591,21 +587,13 @@ const PaperTracking = () => {
       [statusKey]: newStatus
     });
     
-    // If unchecking, also clear score
-    if (!newStatus && scoreData[statusKey]) {
-      const updatedScores = { ...scoreData };
-      delete updatedScores[statusKey];
-      setScoreData(updatedScores);
-    }
-    
     // Save to API
     axios.post(`${API_URL}/completion`, {
       subject_id: subject,
       year: year,
       session: session,
       paper: paper,
-      is_completed: newStatus,
-      score: scoreData[statusKey] || null
+      is_completed: newStatus
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -620,68 +608,6 @@ const PaperTracking = () => {
       });
   };
 
-  const toggleScoreInput = (key) => {
-    setShowScoreInput(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-    
-    // Initialize temp score with current score
-    if (!tempScores[key] && scoreData[key]) {
-      setTempScores(prev => ({
-        ...prev,
-        [key]: scoreData[key]
-      }));
-    }
-  };
-
-  const handleScoreChange = (key, value) => {
-    // Allow clearing the score
-    if (value === "") {
-      setTempScores({ ...tempScores, [key]: "" });
-      return;
-    }
-    
-    // Validate score is a number between 0-100
-    const score = parseInt(value, 10);
-    if (!isNaN(score) && score >= 0 && score <= 100) {
-      setTempScores({ ...tempScores, [key]: score });
-    }
-  };
-
-  const saveScore = (subject, year, session, paper, key) => {
-    const score = tempScores[key] === "" ? null : tempScores[key];
-    const isCompleted = completionStatus[key] || false;
-    
-    // Update score data
-    if (score === null) {
-      const updatedScores = { ...scoreData };
-      delete updatedScores[key];
-      setScoreData(updatedScores);
-    } else {
-      setScoreData({ ...scoreData, [key]: score });
-    }
-    
-    // Hide input
-    setShowScoreInput({ ...showScoreInput, [key]: false });
-    
-    // Save to API
-    axios.post(`${API_URL}/completion`, {
-      subject_id: subject,
-      year: year,
-      session: session,
-      paper: paper,
-      is_completed: isCompleted,
-      score: score
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .catch(err => {
-        console.error('Error updating score:', err);
-        setError('Failed to update score');
-      });
-  };
-
   const getSubjectName = (subjectId) => {
     const subject = availableSubjects.find(s => s.id === subjectId);
     return subject ? subject.name : subjectId;
@@ -691,20 +617,13 @@ const PaperTracking = () => {
     const key = `${subject}-${year}-${session}-${paper}`;
     return completionStatus[key] || false;
   };
-
-  const getScore = (subject, year, session, paper) => {
-    const key = `${subject}-${year}-${session}-${paper}`;
-    return scoreData[key];
-  };
   
   // Calculate completion statistics
   const calculateStats = () => {
-    if (!selectedSubject) return { completed: 0, total: 0, percentage: 0, avgScore: 0 };
+    if (!selectedSubject) return { completed: 0, total: 0, percentage: 0 };
     
     let completed = 0;
     let total = 0;
-    let totalScore = 0;
-    let papersWithScore = 0;
     
     years.forEach(year => {
       sessions.forEach(session => {
@@ -712,15 +631,8 @@ const PaperTracking = () => {
         const papersCount = selectedSubject.includes('_hl') ? 3 : 2;
         for (let i = 0; i < papersCount; i++) {
           total++;
-          const key = `${selectedSubject}-${year}-${session}-${papers[i]}`;
-          if (completionStatus[key]) {
+          if (getPaperStatus(selectedSubject, year, session, papers[i])) {
             completed++;
-            
-            // Count score if available
-            if (scoreData[key]) {
-              totalScore += scoreData[key];
-              papersWithScore++;
-            }
           }
         }
       });
@@ -729,8 +641,7 @@ const PaperTracking = () => {
     return {
       completed,
       total,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
-      avgScore: papersWithScore > 0 ? Math.round(totalScore / papersWithScore) : 0
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
     };
   };
   
@@ -774,36 +685,20 @@ const PaperTracking = () => {
       
       {selectedSubject && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Completion Status */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2">Completion Status</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-gray-200 rounded-full h-4 mr-4">
-                  <div 
-                    className="bg-blue-600 h-4 rounded-full" 
-                    style={{ width: `${stats.percentage}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium">{stats.percentage}%</span>
+          <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+            <h3 className="text-lg font-medium mb-2">Completion Status</h3>
+            <div className="flex items-center">
+              <div className="w-full bg-gray-200 rounded-full h-4 mr-4">
+                <div 
+                  className="bg-blue-600 h-4 rounded-full" 
+                  style={{ width: `${stats.percentage}%` }}
+                ></div>
               </div>
-              <p className="text-sm mt-2">
-                {stats.completed} of {stats.total} papers completed
-              </p>
+              <span className="text-sm font-medium">{stats.percentage}%</span>
             </div>
-
-            {/* Average Score */}
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2">Average Score</h3>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-green-600">
-                  {stats.avgScore > 0 ? `${stats.avgScore}%` : 'N/A'}
-                </div>
-                <div className="text-sm text-gray-600">
-                  For completed papers
-                </div>
-              </div>
-            </div>
+            <p className="text-sm mt-2">
+              {stats.completed} of {stats.total} papers completed
+            </p>
           </div>
           
           <div className="overflow-x-auto">
@@ -825,69 +720,25 @@ const PaperTracking = () => {
                     <tr key={`${year}-${session}`} className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
-                      {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => {
-                        const key = `${selectedSubject}-${year}-${session}-${paper}`;
-                        const isCompleted = getPaperStatus(selectedSubject, year, session, paper);
-                        const score = getScore(selectedSubject, year, session, paper);
-                        
-                        return (
-                          <td key={key} className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  className="form-checkbox h-5 w-5 text-blue-600"
-                                  checked={isCompleted}
-                                  onChange={() => updatePaperStatus(
-                                    selectedSubject,
-                                    year,
-                                    session,
-                                    paper,
-                                    isCompleted
-                                  )}
-                                />
-                                <span className="ml-2 text-sm text-gray-700">Completed</span>
-                              </label>
-                              
-                              {isCompleted && (
-                                <div className="mt-2">
-                                  {showScoreInput[key] ? (
-                                    <div className="flex space-x-2 items-center">
-                                      <input
-                                        type="text"
-                                        value={tempScores[key] ?? ""}
-                                        onChange={(e) => handleScoreChange(key, e.target.value)}
-                                        className="form-input py-1 px-2 text-sm border rounded w-16"
-                                        placeholder="0-100"
-                                        autoFocus
-                                      />
-                                      <button
-                                        onClick={() => saveScore(selectedSubject, year, session, paper, key)}
-                                        className="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded"
-                                      >
-                                        Save
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <div 
-                                      onClick={() => toggleScoreInput(key)}
-                                      className="flex items-center text-sm text-gray-600 hover:text-blue-500 cursor-pointer"
-                                    >
-                                      <span className="mr-1">Score: </span>
-                                      <span className="font-medium">
-                                        {score !== undefined ? `${score}%` : "Add score"}
-                                      </span>
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                      </svg>
-                                    </div>
-                                  )}
-                                </div>
+                      {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
+                        <td key={`${year}-${session}-${paper}`} className="px-6 py-4 whitespace-nowrap">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              checked={getPaperStatus(selectedSubject, year, session, paper)}
+                              onChange={() => updatePaperStatus(
+                                selectedSubject,
+                                year,
+                                session,
+                                paper,
+                                getPaperStatus(selectedSubject, year, session, paper)
                               )}
-                            </div>
-                          </td>
-                        );
-                      })}
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Completed</span>
+                          </label>
+                        </td>
+                      ))}
                     </tr>
                   ))
                 )}
@@ -905,7 +756,6 @@ const Dashboard = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [subjectsUpdated, setSubjectsUpdated] = useState(false);
-  const [activeTab, setActiveTab] = useState('tracking'); // Add this state
 
   // Function to trigger update in the PaperTracking component
   const handleSubjectsChange = () => {
@@ -934,43 +784,10 @@ const Dashboard = () => {
         </div>
       </header>
       
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <button
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'tracking'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              onClick={() => setActiveTab('tracking')}
-            >
-              Paper Tracking
-            </button>
-            <button
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'analysis'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              onClick={() => setActiveTab('analysis')}
-            >
-              Score Analysis
-            </button>
-          </div>
-        </div>
-      </div>
-      
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6">
           <SubjectSelection onSubjectsChange={handleSubjectsChange} />
-          
-          {activeTab === 'tracking' ? (
-            <PaperTracking key={subjectsUpdated} />
-          ) : (
-            <ScoreAnalysis key={`analysis-${subjectsUpdated}`} />
-          )}
+          <PaperTracking key={subjectsUpdated} />
         </div>
       </main>
     </div>
