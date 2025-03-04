@@ -4,56 +4,285 @@ import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
 
-// Define timezone configuration directly in the file
+// Import the timezone configuration directly
+// In a real application, you would create this as a separate file
+// and import it like: import TIMEZONE_CONFIG from './timezone-config.json';
 const TIMEZONE_CONFIG = {
-  // Group 1
-  "english_a_sl": {"paper1": true, "paper2": true},
-  "english_a_hl": {"paper1": true, "paper2": true},
-  "german_a_sl": {"paper1": false, "paper2": false},
-  "german_a_hl": {"paper1": false, "paper2": false},
-  
-  // Group 2
-  "english_b_sl": {"paper1": true, "paper2": true},
-  "english_b_hl": {"paper1": true, "paper2": true},
-  "french_b_sl": {"paper1": true, "paper2": true},
-  "french_b_hl": {"paper1": true, "paper2": true},
-  "spanish_b_sl": {"paper1": true, "paper2": true},
-  "spanish_b_hl": {"paper1": true, "paper2": true},
-  "german_b_sl": {"paper1": false, "paper2": false},
-  "german_b_hl": {"paper1": false, "paper2": false},
-  
-  // Group 3
-  "economics_sl": {"paper1": true, "paper2": true},
-  "economics_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "history_sl": {"paper1": true, "paper2": true},
-  "history_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "psychology_sl": {"paper1": true, "paper2": true},
-  "psychology_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "geography_sl": {"paper1": true, "paper2": true},
-  "geography_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "ess_sl": {"paper1": true, "paper2": true},
-  
-  // Group 4
-  "physics_sl": {"paper1": true, "paper2": true, "paper3": true},
-  "physics_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "chemistry_sl": {"paper1": true, "paper2": true, "paper3": true},
-  "chemistry_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "biology_sl": {"paper1": true, "paper2": true, "paper3": true},
-  "biology_hl": {"paper1": true, "paper2": true, "paper3": true},
-  "computer_science_sl": {"paper1": true, "paper2": true},
-  "computer_science_hl": {"paper1": true, "paper2": true, "paper3": true},
-  
-  // Group 5
-  "math_aa_sl": {"paper1": true, "paper2": true},
-  "math_aa_hl": {"paper1": true, "paper2": true},
-  "math_ai_sl": {"paper1": true, "paper2": true},
-  "math_ai_hl": {"paper1": true, "paper2": true},
-  
-  // Group 6
-  "visual_arts_sl": {"paper1": false},
-  "visual_arts_hl": {"paper1": false},
-  "design_tech_sl": {"paper1": true, "paper2": true},
-  "design_tech_hl": {"paper1": true, "paper2": true, "paper3": true}
+  "english_a_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_a_language_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_language_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "literature_performance_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "german_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "german_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "french_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "french_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "spanish_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "spanish_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "english_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "language_ab_initio_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "latin_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "latin_hl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "business_management_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "business_management_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "economics_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "economics_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": false
+  },
+  "geography_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "geography_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "global_politics_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "global_politics_hl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "history_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "history_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "itgs_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "itgs_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "philosophy_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "philosophy_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "psychology_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "psychology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "anthropology_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "anthropology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "biology_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "biology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "computer_science_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "computer_science_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "design_tech_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "design_tech_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "ess_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "physics_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "physics_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "sports_science_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "sports_science_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "math_aa_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_aa_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "math_ai_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_ai_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "dance_sl": {
+    "paper1": false
+  },
+  "dance_hl": {
+    "paper1": false
+  },
+  "film_sl": {
+    "paper1": false
+  },
+  "film_hl": {
+    "paper1": false
+  },
+  "music_sl": {
+    "paper1": true
+  },
+  "music_hl": {
+    "paper1": true
+  },
+  "theatre_sl": {},
+  "theatre_hl": {},
+  "visual_arts_sl": {},
+  "visual_arts_hl": {}
 };
 
 // Helper functions for timezone variants
@@ -360,8 +589,11 @@ const SubjectSelection = ({ onSubjectsChange }) => {
   const [subjects, setSubjects] = useState([]);
   const [availableSubjects, setAvailableSubjects] = useState([
     // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lit HL', group: 1 },
+    { id: 'english_a_literature_sl', name: 'English A Literature SL', group: 1 },
+    { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
+    { id: 'english_a_language_literature_sl', name: 'English A Language & Literature SL', group: 1 },
+    { id: 'english_a_language_literature_hl', name: 'English A Language & Literature HL', group: 1 },
+    { id: 'literature_performance_sl', name: 'Literature & Performance SL', group: 1 },
     { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
     { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
     
@@ -384,6 +616,16 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
     { id: 'geography_sl', name: 'Geography SL', group: 3 },
     { id: 'geography_hl', name: 'Geography HL', group: 3 },
+    { id: 'business_management_sl', name: 'Business Management SL', group: 3 },
+    { id: 'business_management_hl', name: 'Business Management HL', group: 3 },
+    { id: 'global_politics_sl', name: 'Global Politics SL', group: 3 },
+    { id: 'global_politics_hl', name: 'Global Politics HL', group: 3 },
+    { id: 'philosophy_sl', name: 'Philosophy SL', group: 3 },
+    { id: 'philosophy_hl', name: 'Philosophy HL', group: 3 },
+    { id: 'itgs_sl', name: 'ITGS SL', group: 3 },
+    { id: 'itgs_hl', name: 'ITGS HL', group: 3 },
+    { id: 'anthropology_sl', name: 'Anthropology SL', group: 3 },
+    { id: 'anthropology_hl', name: 'Anthropology HL', group: 3 },
     { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 3 },
     
     // Group 4: Sciences
@@ -395,6 +637,10 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'biology_hl', name: 'Biology HL', group: 4 },
     { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
     { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
+    { id: 'design_tech_sl', name: 'Design Technology SL', group: 4 },
+    { id: 'design_tech_hl', name: 'Design Technology HL', group: 4 },
+    { id: 'sports_science_sl', name: 'Sports Science SL', group: 4 },
+    { id: 'sports_science_hl', name: 'Sports Science HL', group: 4 },
     
     // Group 5: Mathematics
     { id: 'math_aa_sl', name: 'Mathematics AA SL', group: 5 },
@@ -403,10 +649,16 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'math_ai_hl', name: 'Mathematics AI HL', group: 5 },
     
     // Group 6: The Arts
+    { id: 'dance_sl', name: 'Dance SL', group: 6 },
+    { id: 'dance_hl', name: 'Dance HL', group: 6 },
+    { id: 'film_sl', name: 'Film SL', group: 6 },
+    { id: 'film_hl', name: 'Film HL', group: 6 },
+    { id: 'music_sl', name: 'Music SL', group: 6 },
+    { id: 'music_hl', name: 'Music HL', group: 6 },
+    { id: 'theatre_sl', name: 'Theatre SL', group: 6 },
+    { id: 'theatre_hl', name: 'Theatre HL', group: 6 },
     { id: 'visual_arts_sl', name: 'Visual Arts SL', group: 6 },
-    { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 },
-    { id: 'design_tech_sl', name: 'Design Technology SL', group: 6 },
-    { id: 'design_tech_hl', name: 'Design Technology HL', group: 6 }
+    { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 }
   ]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -461,36 +713,12 @@ const SubjectSelection = ({ onSubjectsChange }) => {
 
   // Group subjects by category
   const groupedSubjects = {
-    'Group 1 - Studies in Language and Literature': availableSubjects.filter(s => 
-      s.id.startsWith('english_a_') || 
-      s.id.startsWith('german_a_')
-    ),
-    'Group 2 - Language Acquisition': availableSubjects.filter(s => 
-      (s.id.startsWith('english_b_') || 
-      s.id.startsWith('french_b_') || 
-      s.id.startsWith('spanish_b_') ||
-      s.id.startsWith('german_b_'))
-    ),
-    'Group 3 - Individuals and Societies': availableSubjects.filter(s => 
-      s.id.startsWith('economics_') || 
-      s.id.startsWith('history_') || 
-      s.id.startsWith('psychology_') ||
-      s.id.startsWith('geography_') ||
-      s.id === 'ess_sl'
-    ),
-    'Group 4 - Sciences': availableSubjects.filter(s => 
-      s.id.startsWith('physics_') || 
-      s.id.startsWith('chemistry_') || 
-      s.id.startsWith('biology_') || 
-      s.id.startsWith('computer_science_')
-    ),
-    'Group 5 - Mathematics': availableSubjects.filter(s => 
-      s.id.startsWith('math_')
-    ),
-    'Group 6 - The Arts': availableSubjects.filter(s => 
-      s.id.startsWith('visual_arts_') ||
-      s.id.startsWith('design_tech_')
-    )
+    'Group 1 - Studies in Language and Literature': availableSubjects.filter(s => s.group === 1),
+    'Group 2 - Language Acquisition': availableSubjects.filter(s => s.group === 2),
+    'Group 3 - Individuals and Societies': availableSubjects.filter(s => s.group === 3),
+    'Group 4 - Sciences': availableSubjects.filter(s => s.group === 4),
+    'Group 5 - Mathematics': availableSubjects.filter(s => s.group === 5),
+    'Group 6 - The Arts': availableSubjects.filter(s => s.group === 6)
   };
 
   return (
@@ -566,8 +794,11 @@ const PaperTracking = () => {
   const [completionStatus, setCompletionStatus] = useState({});
   const [availableSubjects, setAvailableSubjects] = useState([
     // Group 1: Studies in Language and Literature
-    { id: 'english_a_sl', name: 'English A Lit SL', group: 1 },
-    { id: 'english_a_hl', name: 'English A Lit HL', group: 1 },
+    { id: 'english_a_literature_sl', name: 'English A Literature SL', group: 1 },
+    { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
+    { id: 'english_a_language_literature_sl', name: 'English A Language & Literature SL', group: 1 },
+    { id: 'english_a_language_literature_hl', name: 'English A Language & Literature HL', group: 1 },
+    { id: 'literature_performance_sl', name: 'Literature & Performance SL', group: 1 },
     { id: 'german_a_sl', name: 'German A Lang & Lit SL', group: 1 },
     { id: 'german_a_hl', name: 'German A Lang & Lit HL', group: 1 },
     
@@ -590,6 +821,16 @@ const PaperTracking = () => {
     { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
     { id: 'geography_sl', name: 'Geography SL', group: 3 },
     { id: 'geography_hl', name: 'Geography HL', group: 3 },
+    { id: 'business_management_sl', name: 'Business Management SL', group: 3 },
+    { id: 'business_management_hl', name: 'Business Management HL', group: 3 },
+    { id: 'global_politics_sl', name: 'Global Politics SL', group: 3 },
+    { id: 'global_politics_hl', name: 'Global Politics HL', group: 3 },
+    { id: 'philosophy_sl', name: 'Philosophy SL', group: 3 },
+    { id: 'philosophy_hl', name: 'Philosophy HL', group: 3 },
+    { id: 'itgs_sl', name: 'ITGS SL', group: 3 },
+    { id: 'itgs_hl', name: 'ITGS HL', group: 3 },
+    { id: 'anthropology_sl', name: 'Anthropology SL', group: 3 },
+    { id: 'anthropology_hl', name: 'Anthropology HL', group: 3 },
     { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 3 },
     
     // Group 4: Sciences
@@ -601,6 +842,10 @@ const PaperTracking = () => {
     { id: 'biology_hl', name: 'Biology HL', group: 4 },
     { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
     { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
+    { id: 'design_tech_sl', name: 'Design Technology SL', group: 4 },
+    { id: 'design_tech_hl', name: 'Design Technology HL', group: 4 },
+    { id: 'sports_science_sl', name: 'Sports Science SL', group: 4 },
+    { id: 'sports_science_hl', name: 'Sports Science HL', group: 4 },
     
     // Group 5: Mathematics
     { id: 'math_aa_sl', name: 'Mathematics AA SL', group: 5 },
@@ -609,10 +854,16 @@ const PaperTracking = () => {
     { id: 'math_ai_hl', name: 'Mathematics AI HL', group: 5 },
     
     // Group 6: The Arts
+    { id: 'dance_sl', name: 'Dance SL', group: 6 },
+    { id: 'dance_hl', name: 'Dance HL', group: 6 },
+    { id: 'film_sl', name: 'Film SL', group: 6 },
+    { id: 'film_hl', name: 'Film HL', group: 6 },
+    { id: 'music_sl', name: 'Music SL', group: 6 },
+    { id: 'music_hl', name: 'Music HL', group: 6 },
+    { id: 'theatre_sl', name: 'Theatre SL', group: 6 },
+    { id: 'theatre_hl', name: 'Theatre HL', group: 6 },
     { id: 'visual_arts_sl', name: 'Visual Arts SL', group: 6 },
-    { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 },
-    { id: 'design_tech_sl', name: 'Design Technology SL', group: 6 },
-    { id: 'design_tech_hl', name: 'Design Technology HL', group: 6 }
+    { id: 'visual_arts_hl', name: 'Visual Arts HL', group: 6 }
   ]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
@@ -736,12 +987,16 @@ const PaperTracking = () => {
     
     years.forEach(year => {
       sessions.forEach(session => {
-        // Determine which papers to check based on subject level
-        const papersCount = selectedSubject.includes('_hl') ? 3 : 2;
+        // Determine which papers to check based on subject
+        const papersList = Object.keys(TIMEZONE_CONFIG[selectedSubject] || {})
+          .filter(key => key.startsWith('paper'))
+          .map(key => `Paper ${key.charAt(5)}`);
         
-        for (let i = 0; i < papersCount; i++) {
-          const paper = papers[i];
-          
+        if (papersList.length === 0) {
+          return;
+        }
+        
+        papersList.forEach(paper => {
           // Check if this paper has TZ variants
           if (hasTZVariants(selectedSubject, paper)) {
             // Count each timezone variant
@@ -758,7 +1013,7 @@ const PaperTracking = () => {
               completed++;
             }
           }
-        }
+        });
       });
     });
     
@@ -783,6 +1038,13 @@ const PaperTracking = () => {
       </div>
     );
   }
+
+  // Get available papers for the selected subject
+  const availablePapers = selectedSubject && TIMEZONE_CONFIG[selectedSubject] 
+    ? Object.keys(TIMEZONE_CONFIG[selectedSubject])
+      .filter(key => key.startsWith('paper'))
+      .map(key => `Paper ${key.charAt(5)}`)
+    : [];
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -846,7 +1108,7 @@ const PaperTracking = () => {
                   <th className="w-10"></th> {/* Expansion control column */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
-                  {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
+                  {availablePapers.map(paper => (
                     <th key={paper} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {paper}
                     </th>
@@ -859,8 +1121,7 @@ const PaperTracking = () => {
                     const rowKey = `${year}-${session}`;
                     const isExpanded = expandedRows[rowKey] || false;
                     // Check if any paper in this row has TZ variants
-                    const rowHasTZVariants = papers
-                      .slice(0, selectedSubject.includes('_hl') ? 3 : 2)
+                    const rowHasTZVariants = availablePapers
                       .some(paper => hasTZVariants(selectedSubject, paper));
                     
                     return (
@@ -889,7 +1150,7 @@ const PaperTracking = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
                           
                           {/* Show status for each paper */}
-                          {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => {
+                          {availablePapers.map(paper => {
                             const paperHasTZ = hasTZVariants(selectedSubject, paper);
                             const status = getCombinedStatus(selectedSubject, year, session, paper);
                             
@@ -946,7 +1207,7 @@ const PaperTracking = () => {
                               <span className="font-medium">Timezone Variants:</span>
                             </td>
                             
-                            {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => {
+                            {availablePapers.map(paper => {
                               if (hasTZVariants(selectedSubject, paper)) {
                                 return (
                                   <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3">

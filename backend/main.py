@@ -30,7 +30,6 @@ app.add_middleware(
 )
 
 # Database connection string from .env
-# DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/postgres")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # SQLAlchemy setup
@@ -58,57 +57,15 @@ IB_SUBJECT_GROUPS = {
     ]
 }
 
-# Define which subjects have TZ variants for which papers
-TIMEZONE_CONFIG = {
-    # Group 1
-    "english_a_sl": {"paper1": True, "paper2": True},
-    "english_a_hl": {"paper1": True, "paper2": True},
-    "german_a_sl": {"paper1": False, "paper2": False},
-    "german_a_hl": {"paper1": False, "paper2": False},
-    
-    # Group 2
-    "english_b_sl": {"paper1": True, "paper2": True},
-    "english_b_hl": {"paper1": True, "paper2": True},
-    "french_b_sl": {"paper1": True, "paper2": True},
-    "french_b_hl": {"paper1": True, "paper2": True},
-    "spanish_b_sl": {"paper1": True, "paper2": True},
-    "spanish_b_hl": {"paper1": True, "paper2": True},
-    "german_b_sl": {"paper1": False, "paper2": False},
-    "german_b_hl": {"paper1": False, "paper2": False},
-    
-    # Group 3
-    "economics_sl": {"paper1": True, "paper2": True},
-    "economics_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "history_sl": {"paper1": True, "paper2": True},
-    "history_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "psychology_sl": {"paper1": True, "paper2": True},
-    "psychology_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "geography_sl": {"paper1": True, "paper2": True},
-    "geography_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "ess_sl": {"paper1": True, "paper2": True},
-    
-    # Group 4
-    "physics_sl": {"paper1": True, "paper2": True, "paper3": True},
-    "physics_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "chemistry_sl": {"paper1": True, "paper2": True, "paper3": True},
-    "chemistry_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "biology_sl": {"paper1": True, "paper2": True, "paper3": True},
-    "biology_hl": {"paper1": True, "paper2": True, "paper3": True},
-    "computer_science_sl": {"paper1": True, "paper2": True},
-    "computer_science_hl": {"paper1": True, "paper2": True, "paper3": True},
-    
-    # Group 5
-    "math_aa_sl": {"paper1": True, "paper2": True},
-    "math_aa_hl": {"paper1": True, "paper2": True},
-    "math_ai_sl": {"paper1": True, "paper2": True},
-    "math_ai_hl": {"paper1": True, "paper2": True},
-    
-    # Group 6
-    "visual_arts_sl": {"paper1": False},
-    "visual_arts_hl": {"paper1": False},
-    "design_tech_sl": {"paper1": True, "paper2": True},
-    "design_tech_hl": {"paper1": True, "paper2": True, "paper3": True}
-}
+# Load timezone configuration from JSON file
+TIMEZONE_CONFIG = {}
+try:
+    with open('timezone-config.json', 'r') as f:
+        TIMEZONE_CONFIG = json.load(f)
+except Exception as e:
+    print(f"Warning: Could not load timezone-config.json: {e}")
+    # If the file doesn't exist, the TIMEZONE_CONFIG will remain empty
+    # The application will still function but without timezone support
 
 # Initialize database
 def init_db():
