@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # IB Past Paper Tracker
 
 An application to help IB students track their past paper completion and analyze their performance.
@@ -6,26 +5,15 @@ An application to help IB students track their past paper completion and analyze
 # Paperpath
 
 A web application designed to help International Baccalaureate (IB) students track their past paper practice, organize by subject groups, and monitor their exam preparation progress.
->>>>>>> 2620c88e648da7fb6f6263970aee409339d24dc3
 
 ## Features
 
 - **User Authentication**: Secure login and registration system
-<<<<<<< HEAD
 - **Subject Management**: Add and manage your IB subjects
 - **Paper Tracking**: Track which past papers you've completed across years (2019-2024)
 - **Score Recording**: Record your scores for each completed paper
 - **Score Analysis**: Visualize your performance with charts and statistics
 
-## New Score Tracking Feature
-
-The latest update includes a comprehensive score tracking feature:
-
-- Record scores (0-100%) for each completed past paper
-- View average, highest, and lowest scores for each subject
-- Track your progress over time with visual graphs
-- Get insights about your performance trends
-- Compare performance across different subjects
 
 ### How to Use
 
@@ -146,8 +134,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
-
-- International Baccalaureate Organization for their educational program
-- All contributors and testers who helped improve this application
->>>>>>> 2620c88e648da7fb6f6263970aee409339d24dc3
