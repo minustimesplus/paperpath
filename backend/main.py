@@ -58,6 +58,58 @@ IB_SUBJECT_GROUPS = {
     ]
 }
 
+# Define which subjects have TZ variants for which papers
+TIMEZONE_CONFIG = {
+    # Group 1
+    "english_a_sl": {"paper1": True, "paper2": True},
+    "english_a_hl": {"paper1": True, "paper2": True},
+    "german_a_sl": {"paper1": False, "paper2": False},
+    "german_a_hl": {"paper1": False, "paper2": False},
+    
+    # Group 2
+    "english_b_sl": {"paper1": True, "paper2": True},
+    "english_b_hl": {"paper1": True, "paper2": True},
+    "french_b_sl": {"paper1": True, "paper2": True},
+    "french_b_hl": {"paper1": True, "paper2": True},
+    "spanish_b_sl": {"paper1": True, "paper2": True},
+    "spanish_b_hl": {"paper1": True, "paper2": True},
+    "german_b_sl": {"paper1": False, "paper2": False},
+    "german_b_hl": {"paper1": False, "paper2": False},
+    
+    # Group 3
+    "economics_sl": {"paper1": True, "paper2": True},
+    "economics_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "history_sl": {"paper1": True, "paper2": True},
+    "history_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "psychology_sl": {"paper1": True, "paper2": True},
+    "psychology_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "geography_sl": {"paper1": True, "paper2": True},
+    "geography_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "ess_sl": {"paper1": True, "paper2": True},
+    
+    # Group 4
+    "physics_sl": {"paper1": True, "paper2": True, "paper3": True},
+    "physics_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "chemistry_sl": {"paper1": True, "paper2": True, "paper3": True},
+    "chemistry_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "biology_sl": {"paper1": True, "paper2": True, "paper3": True},
+    "biology_hl": {"paper1": True, "paper2": True, "paper3": True},
+    "computer_science_sl": {"paper1": True, "paper2": True},
+    "computer_science_hl": {"paper1": True, "paper2": True, "paper3": True},
+    
+    # Group 5
+    "math_aa_sl": {"paper1": True, "paper2": True},
+    "math_aa_hl": {"paper1": True, "paper2": True},
+    "math_ai_sl": {"paper1": True, "paper2": True},
+    "math_ai_hl": {"paper1": True, "paper2": True},
+    
+    # Group 6
+    "visual_arts_sl": {"paper1": False},
+    "visual_arts_hl": {"paper1": False},
+    "design_tech_sl": {"paper1": True, "paper2": True},
+    "design_tech_hl": {"paper1": True, "paper2": True, "paper3": True}
+}
+
 # Initialize database
 def init_db():
     try:
@@ -87,7 +139,7 @@ def init_db():
         )
         ''')
         
-        # Create completion status table
+        # Create completion status table with timezone field
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS completion_status (
             id SERIAL PRIMARY KEY,
@@ -96,6 +148,7 @@ def init_db():
             year INTEGER NOT NULL,
             session TEXT NOT NULL,
             paper TEXT NOT NULL,
+            timezone TEXT,
             is_completed BOOLEAN NOT NULL DEFAULT FALSE,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
@@ -107,6 +160,59 @@ def init_db():
         print("PostgreSQL database initialized successfully")
     except Exception as e:
         print(f"Error initializing PostgreSQL database: {e}")
+
+def migrate_completion_data():
+    """
+    Migrate existing completion data to support timezone field.
+    This function should be run once after updating the database schema.
+    """
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # First, make sure the timezone column exists
+        cursor.execute("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='completion_status' AND column_name='timezone'
+        """)
+        
+        if not cursor.fetchone():
+            print("Adding timezone column to completion_status table...")
+            cursor.execute("ALTER TABLE completion_status ADD COLUMN timezone TEXT")
+        
+        # Now migrate the data
+        # Get all completion status records
+        cursor.execute("""
+        SELECT id, subject_id, paper FROM completion_status WHERE timezone IS NULL
+        """)
+        
+        records = cursor.fetchall()
+        print(f"Found {len(records)} records to migrate")
+        
+        # Process each record
+        updated_count = 0
+        for record_id, subject_id, paper in records:
+            paper_key = paper.lower().replace(' ', '')
+            
+            # Check if this subject-paper has TZ variants
+            if subject_id in TIMEZONE_CONFIG and paper_key in TIMEZONE_CONFIG[subject_id]:
+                if TIMEZONE_CONFIG[subject_id][paper_key]:
+                    # This paper should have TZ variants, set to TZ1 as default
+                    cursor.execute("""
+                    UPDATE completion_status SET timezone = 'TZ1' WHERE id = %s
+                    """, (record_id,))
+                    updated_count += 1
+            
+        print(f"Updated {updated_count} records")
+        
+        cursor.close()
+        conn.close()
+        print("Migration completed successfully")
+        
+    except Exception as e:
+        print(f"Error during migration: {e}")
 
 # Test database connection at startup
 @app.on_event("startup")
@@ -120,6 +226,9 @@ async def startup_event():
     
     # Initialize database
     init_db()
+    
+    # Run migration for existing data
+    migrate_completion_data()
 
 # Security setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -153,6 +262,7 @@ class CompletionStatus(BaseModel):
     year: int
     session: str
     paper: str
+    timezone: Optional[str] = None
     is_completed: bool
 
 # Helper functions
@@ -357,6 +467,11 @@ async def get_subject_groups():
     """Return all available IB subject groups and their subjects"""
     return {"subject_groups": IB_SUBJECT_GROUPS}
 
+@app.get("/timezone-config")
+async def get_timezone_config():
+    """Return the timezone configuration for all subjects"""
+    return {"timezone_config": TIMEZONE_CONFIG}
+
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
     try:
@@ -365,13 +480,21 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
         cursor = conn.cursor()
         
         # Check if this specific paper status already exists
-        cursor.execute(
-            """
+        query = """
             SELECT id FROM completion_status 
-            WHERE user_id = %s AND subject_id = %s AND year = %s AND session = %s AND paper = %s
-            """, 
-            (current_user.id, status.subject_id, status.year, status.session, status.paper)
-        )
+            WHERE user_id = %s AND subject_id = %s AND year = %s 
+            AND session = %s AND paper = %s
+        """
+        params = [current_user.id, status.subject_id, status.year, status.session, status.paper]
+        
+        # Add timezone to query if provided
+        if status.timezone:
+            query += " AND timezone = %s"
+            params.append(status.timezone)
+        else:
+            query += " AND (timezone IS NULL OR timezone = '')"
+            
+        cursor.execute(query, params)
         existing = cursor.fetchone()
         
         if existing:
@@ -389,10 +512,11 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
             cursor.execute(
                 """
                 INSERT INTO completion_status 
-                (user_id, subject_id, year, session, paper, is_completed) 
-                VALUES (%s, %s, %s, %s, %s, %s)
+                (user_id, subject_id, year, session, paper, timezone, is_completed) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (current_user.id, status.subject_id, status.year, status.session, status.paper, status.is_completed)
+                (current_user.id, status.subject_id, status.year, status.session, 
+                 status.paper, status.timezone, status.is_completed)
             )
         
         cursor.close()
@@ -414,7 +538,7 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
         
         cursor.execute(
             """
-            SELECT subject_id, year, session, paper, is_completed 
+            SELECT subject_id, year, session, paper, timezone, is_completed 
             FROM completion_status 
             WHERE user_id = %s
             """, 
@@ -427,8 +551,12 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
         
         completion_data = {}
         for row in results:
-            key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}"
-            completion_data[key] = row[4]
+            # Include timezone in the key if it exists
+            if row[4]:  # timezone
+                key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}-{row[4]}"
+            else:
+                key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}"
+            completion_data[key] = row[5]  # is_completed
         
         return completion_data
     except Exception as e:

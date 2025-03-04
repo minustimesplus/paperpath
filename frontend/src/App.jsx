@@ -4,6 +4,75 @@ import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
 
+// Define timezone configuration directly in the file
+const TIMEZONE_CONFIG = {
+  // Group 1
+  "english_a_sl": {"paper1": true, "paper2": true},
+  "english_a_hl": {"paper1": true, "paper2": true},
+  "german_a_sl": {"paper1": false, "paper2": false},
+  "german_a_hl": {"paper1": false, "paper2": false},
+  
+  // Group 2
+  "english_b_sl": {"paper1": true, "paper2": true},
+  "english_b_hl": {"paper1": true, "paper2": true},
+  "french_b_sl": {"paper1": true, "paper2": true},
+  "french_b_hl": {"paper1": true, "paper2": true},
+  "spanish_b_sl": {"paper1": true, "paper2": true},
+  "spanish_b_hl": {"paper1": true, "paper2": true},
+  "german_b_sl": {"paper1": false, "paper2": false},
+  "german_b_hl": {"paper1": false, "paper2": false},
+  
+  // Group 3
+  "economics_sl": {"paper1": true, "paper2": true},
+  "economics_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "history_sl": {"paper1": true, "paper2": true},
+  "history_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "psychology_sl": {"paper1": true, "paper2": true},
+  "psychology_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "geography_sl": {"paper1": true, "paper2": true},
+  "geography_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "ess_sl": {"paper1": true, "paper2": true},
+  
+  // Group 4
+  "physics_sl": {"paper1": true, "paper2": true, "paper3": true},
+  "physics_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "chemistry_sl": {"paper1": true, "paper2": true, "paper3": true},
+  "chemistry_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "biology_sl": {"paper1": true, "paper2": true, "paper3": true},
+  "biology_hl": {"paper1": true, "paper2": true, "paper3": true},
+  "computer_science_sl": {"paper1": true, "paper2": true},
+  "computer_science_hl": {"paper1": true, "paper2": true, "paper3": true},
+  
+  // Group 5
+  "math_aa_sl": {"paper1": true, "paper2": true},
+  "math_aa_hl": {"paper1": true, "paper2": true},
+  "math_ai_sl": {"paper1": true, "paper2": true},
+  "math_ai_hl": {"paper1": true, "paper2": true},
+  
+  // Group 6
+  "visual_arts_sl": {"paper1": false},
+  "visual_arts_hl": {"paper1": false},
+  "design_tech_sl": {"paper1": true, "paper2": true},
+  "design_tech_hl": {"paper1": true, "paper2": true, "paper3": true}
+};
+
+// Helper functions for timezone variants
+const hasTZVariants = (subjectId, paper) => {
+  const paperKey = paper.toLowerCase().replace(' ', '');
+  if (!TIMEZONE_CONFIG[subjectId] || !TIMEZONE_CONFIG[subjectId][paperKey]) {
+    return false;
+  }
+  return TIMEZONE_CONFIG[subjectId][paperKey];
+};
+
+const subjectHasTZVariants = (subjectId) => {
+  if (!TIMEZONE_CONFIG[subjectId]) {
+    return false;
+  }
+  
+  return Object.values(TIMEZONE_CONFIG[subjectId]).some(hasTZ => hasTZ === true);
+};
+
 // Auth Context
 const AuthContext = React.createContext();
 
@@ -170,8 +239,6 @@ const Login = () => {
   );
 };
 
-
-// have to test github
 // Register Component
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -317,6 +384,7 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
     { id: 'geography_sl', name: 'Geography SL', group: 3 },
     { id: 'geography_hl', name: 'Geography HL', group: 3 },
+    { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 3 },
     
     // Group 4: Sciences
     { id: 'physics_sl', name: 'Physics SL', group: 4 },
@@ -327,7 +395,6 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     { id: 'biology_hl', name: 'Biology HL', group: 4 },
     { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
     { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
-    { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
     
     // Group 5: Mathematics
     { id: 'math_aa_sl', name: 'Mathematics AA SL', group: 5 },
@@ -392,39 +459,39 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     return subject ? subject.name : subjectId;
   };
 
-// Group subjects by category
-const groupedSubjects = {
-  'Group 1 - Studies in Language and Literature': availableSubjects.filter(s => 
-    s.id.startsWith('english_a_') || 
-    s.id.startsWith('german_a_')
-  ),
-  'Group 2 - Language Acquisition': availableSubjects.filter(s => 
-    (s.id.startsWith('english_b_') || 
-    s.id.startsWith('french_b_') || 
-    s.id.startsWith('spanish_b_') ||
-    s.id.startsWith('german_b_'))
-  ),
-  'Group 3 - Individuals and Societies': availableSubjects.filter(s => 
-    s.id.startsWith('economics_') || 
-    s.id.startsWith('history_') || 
-    s.id.startsWith('psychology_') ||
-    s.id.startsWith('geography_') ||
-    s.id === 'ess_sl'
-  ),
-  'Group 4 - Sciences': availableSubjects.filter(s => 
-    s.id.startsWith('physics_') || 
-    s.id.startsWith('chemistry_') || 
-    s.id.startsWith('biology_') || 
-    s.id.startsWith('computer_science_')
-  ),
-  'Group 5 - Mathematics': availableSubjects.filter(s => 
-    s.id.startsWith('math_')
-  ),
-  'Group 6 - The Arts': availableSubjects.filter(s => 
-    s.id.startsWith('visual_arts_') ||
-    s.id.startsWith('design_tech_')
-  )
-};
+  // Group subjects by category
+  const groupedSubjects = {
+    'Group 1 - Studies in Language and Literature': availableSubjects.filter(s => 
+      s.id.startsWith('english_a_') || 
+      s.id.startsWith('german_a_')
+    ),
+    'Group 2 - Language Acquisition': availableSubjects.filter(s => 
+      (s.id.startsWith('english_b_') || 
+      s.id.startsWith('french_b_') || 
+      s.id.startsWith('spanish_b_') ||
+      s.id.startsWith('german_b_'))
+    ),
+    'Group 3 - Individuals and Societies': availableSubjects.filter(s => 
+      s.id.startsWith('economics_') || 
+      s.id.startsWith('history_') || 
+      s.id.startsWith('psychology_') ||
+      s.id.startsWith('geography_') ||
+      s.id === 'ess_sl'
+    ),
+    'Group 4 - Sciences': availableSubjects.filter(s => 
+      s.id.startsWith('physics_') || 
+      s.id.startsWith('chemistry_') || 
+      s.id.startsWith('biology_') || 
+      s.id.startsWith('computer_science_')
+    ),
+    'Group 5 - Mathematics': availableSubjects.filter(s => 
+      s.id.startsWith('math_')
+    ),
+    'Group 6 - The Arts': availableSubjects.filter(s => 
+      s.id.startsWith('visual_arts_') ||
+      s.id.startsWith('design_tech_')
+    )
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -492,7 +559,7 @@ const groupedSubjects = {
   );
 };
 
-// Paper Tracking Component
+// Paper Tracking Component with TZ support
 const PaperTracking = () => {
   const { token } = useAuth();
   const [subjects, setSubjects] = useState([]);
@@ -550,10 +617,24 @@ const PaperTracking = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // New state for tracking expanded rows
+  const [expandedRows, setExpandedRows] = useState({});
   
   const years = [2019, 2020, 2021, 2022, 2023, 2024];
   const sessions = ['May', 'November'];
   const papers = ['Paper 1', 'Paper 2', 'Paper 3'];
+  const timezones = ['TZ1', 'TZ2'];
+
+  // Toggle row expansion
+  const toggleRowExpansion = (rowKey) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [rowKey]: !prev[rowKey]
+    }));
+  };
+  
+  // Check if this selected subject has any papers with TZ variants
+  const subjectHasAnyTZVariants = selectedSubject ? subjectHasTZVariants(selectedSubject) : false;
 
   useEffect(() => {
     // Fetch user's subjects
@@ -577,8 +658,12 @@ const PaperTracking = () => {
       });
   }, [token]);
 
-  const updatePaperStatus = (subject, year, session, paper, isCompleted) => {
-    const statusKey = `${subject}-${year}-${session}-${paper}`;
+  const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted) => {
+    // Create a status key that includes timezone if it exists
+    const statusKey = timezone 
+      ? `${subject}-${year}-${session}-${paper}-${timezone}`
+      : `${subject}-${year}-${session}-${paper}`;
+    
     const newStatus = !isCompleted;
     
     // Optimistic update
@@ -593,6 +678,7 @@ const PaperTracking = () => {
       year: year,
       session: session,
       paper: paper,
+      timezone: timezone || null,
       is_completed: newStatus
     }, {
       headers: { Authorization: `Bearer ${token}` }
@@ -605,6 +691,7 @@ const PaperTracking = () => {
           [statusKey]: isCompleted
         });
         setError('Failed to update paper status');
+        setTimeout(() => setError(''), 3000);
       });
   };
 
@@ -613,9 +700,31 @@ const PaperTracking = () => {
     return subject ? subject.name : subjectId;
   };
 
-  const getPaperStatus = (subject, year, session, paper) => {
-    const key = `${subject}-${year}-${session}-${paper}`;
+  const getPaperStatus = (subject, year, session, paper, timezone) => {
+    // Create a status key that includes timezone if it exists
+    const key = timezone 
+      ? `${subject}-${year}-${session}-${paper}-${timezone}`
+      : `${subject}-${year}-${session}-${paper}`;
+    
     return completionStatus[key] || false;
+  };
+  
+  // Calculate combined status for papers with TZ variants
+  const getCombinedStatus = (subject, year, session, paper) => {
+    if (!hasTZVariants(subject, paper)) {
+      return getPaperStatus(subject, year, session, paper) ? 'completed' : 'incomplete';
+    }
+    
+    const tz1Completed = getPaperStatus(subject, year, session, paper, 'TZ1');
+    const tz2Completed = getPaperStatus(subject, year, session, paper, 'TZ2');
+    
+    if (tz1Completed && tz2Completed) {
+      return 'completed';
+    } else if (tz1Completed || tz2Completed) {
+      return 'partial';
+    } else {
+      return 'incomplete';
+    }
   };
   
   // Calculate completion statistics
@@ -627,12 +736,27 @@ const PaperTracking = () => {
     
     years.forEach(year => {
       sessions.forEach(session => {
-        // Use a simplified papersToCheck assignment
+        // Determine which papers to check based on subject level
         const papersCount = selectedSubject.includes('_hl') ? 3 : 2;
+        
         for (let i = 0; i < papersCount; i++) {
-          total++;
-          if (getPaperStatus(selectedSubject, year, session, papers[i])) {
-            completed++;
+          const paper = papers[i];
+          
+          // Check if this paper has TZ variants
+          if (hasTZVariants(selectedSubject, paper)) {
+            // Count each timezone variant
+            timezones.forEach(timezone => {
+              total++;
+              if (getPaperStatus(selectedSubject, year, session, paper, timezone)) {
+                completed++;
+              }
+            });
+          } else {
+            // Count only the single paper
+            total++;
+            if (getPaperStatus(selectedSubject, year, session, paper)) {
+              completed++;
+            }
           }
         }
       });
@@ -701,46 +825,179 @@ const PaperTracking = () => {
             </p>
           </div>
           
+          {/* Show a note about TZ variants if applicable */}
+          {subjectHasAnyTZVariants && (
+            <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Some papers for this subject have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg> icon to see and track these variants.
+              </p>
+            </div>
+          )}
+          
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="w-10"></th> {/* Expansion control column */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 1</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 2</th>
-                  {selectedSubject.includes('_hl') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper 3</th>
-                  )}
+                  {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
+                    <th key={paper} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {paper}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {years.map(year => 
-                  sessions.map((session, sessionIndex) => (
-                    <tr key={`${year}-${session}`} className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
-                      {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => (
-                        <td key={`${year}-${session}-${paper}`} className="px-6 py-4 whitespace-nowrap">
-                          <label className="inline-flex items-center">
-                            <input
-                              type="checkbox"
-                              className="form-checkbox h-5 w-5 text-blue-600"
-                              checked={getPaperStatus(selectedSubject, year, session, paper)}
-                              onChange={() => updatePaperStatus(
-                                selectedSubject,
-                                year,
-                                session,
-                                paper,
-                                getPaperStatus(selectedSubject, year, session, paper)
-                              )}
-                            />
-                            <span className="ml-2 text-sm text-gray-700">Completed</span>
-                          </label>
-                        </td>
-                      ))}
-                    </tr>
-                  ))
+                  sessions.map((session, sessionIndex) => {
+                    const rowKey = `${year}-${session}`;
+                    const isExpanded = expandedRows[rowKey] || false;
+                    // Check if any paper in this row has TZ variants
+                    const rowHasTZVariants = papers
+                      .slice(0, selectedSubject.includes('_hl') ? 3 : 2)
+                      .some(paper => hasTZVariants(selectedSubject, paper));
+                    
+                    return (
+                      <React.Fragment key={rowKey}>
+                        {/* Main row */}
+                        <tr className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                          <td className="pl-4 py-4">
+                            {rowHasTZVariants && (
+                              <button 
+                                onClick={() => toggleRowExpansion(rowKey)}
+                                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                aria-label={isExpanded ? "Collapse row" : "Expand row"}
+                              >
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                  viewBox="0 0 20 20" 
+                                  fill="currentColor"
+                                >
+                                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
+                          
+                          {/* Show status for each paper */}
+                          {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => {
+                            const paperHasTZ = hasTZVariants(selectedSubject, paper);
+                            const status = getCombinedStatus(selectedSubject, year, session, paper);
+                            
+                            if (paperHasTZ) {
+                              // For papers with TZ variants, show status indicator
+                              return (
+                                <td key={`${rowKey}-${paper}`} className="px-6 py-4 whitespace-nowrap">
+                                  {status === 'completed' ? (
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                      All Complete
+                                    </span>
+                                  ) : status === 'partial' ? (
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                      Partially Complete
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                      Incomplete
+                                    </span>
+                                  )}
+                                </td>
+                              );
+                            } else {
+                              // For papers without TZ variants, show regular checkbox
+                              return (
+                                <td key={`${rowKey}-${paper}`} className="px-6 py-4 whitespace-nowrap">
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                      checked={getPaperStatus(selectedSubject, year, session, paper)}
+                                      onChange={() => updatePaperStatus(
+                                        selectedSubject,
+                                        year,
+                                        session,
+                                        paper,
+                                        null,
+                                        getPaperStatus(selectedSubject, year, session, paper)
+                                      )}
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">Completed</span>
+                                  </label>
+                                </td>
+                              );
+                            }
+                          })}
+                        </tr>
+                        
+                        {/* Expanded row for TZ variants */}
+                        {isExpanded && rowHasTZVariants && (
+                          <tr className={sessionIndex % 2 === 0 ? 'bg-gray-100' : 'bg-gray-50'}>
+                            <td></td>
+                            <td colSpan="2" className="px-6 py-3 text-sm text-gray-500 text-right">
+                              <span className="font-medium">Timezone Variants:</span>
+                            </td>
+                            
+                            {papers.slice(0, selectedSubject.includes('_hl') ? 3 : 2).map(paper => {
+                              if (hasTZVariants(selectedSubject, paper)) {
+                                return (
+                                  <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3">
+                                    <div className="flex flex-col space-y-2">
+                                      {/* TZ1 Checkbox */}
+                                      <label className="inline-flex items-center">
+                                        <input
+                                          type="checkbox"
+                                          className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                          checked={getPaperStatus(selectedSubject, year, session, paper, 'TZ1')}
+                                          onChange={() => updatePaperStatus(
+                                            selectedSubject,
+                                            year,
+                                            session,
+                                            paper,
+                                            'TZ1',
+                                            getPaperStatus(selectedSubject, year, session, paper, 'TZ1')
+                                          )}
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">TZ1</span>
+                                      </label>
+                                      
+                                      {/* TZ2 Checkbox */}
+                                      <label className="inline-flex items-center">
+                                        <input
+                                          type="checkbox"
+                                          className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                          checked={getPaperStatus(selectedSubject, year, session, paper, 'TZ2')}
+                                          onChange={() => updatePaperStatus(
+                                            selectedSubject,
+                                            year,
+                                            session,
+                                            paper,
+                                            'TZ2',
+                                            getPaperStatus(selectedSubject, year, session, paper, 'TZ2')
+                                          )}
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">TZ2</span>
+                                      </label>
+                                    </div>
+                                  </td>
+                                );
+                              } else {
+                                return <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3 text-sm text-gray-400 italic">N/A</td>;
+                              }
+                            })}
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
                 )}
               </tbody>
             </table>
