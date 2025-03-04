@@ -134,8 +134,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
-
-- International Baccalaureate Organization for their educational program
-- All contributors and testers who helped improve this application
->>>>>>> 2620c88e648da7fb6f6263970aee409339d24dc3
