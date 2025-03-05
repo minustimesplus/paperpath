@@ -26,6 +26,7 @@ const PaperTracking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
+  const [scoreDialog, setScoreDialog] = useState({ isOpen: false, paperInfo: null });
 
   // Toggle row expansion
   const toggleRowExpansion = (rowKey) => {
@@ -62,7 +63,7 @@ const PaperTracking = () => {
       });
   }, [token]);
 
-  const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted) => {
+  const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted, score = null) => {
     const statusKey = timezone 
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
@@ -72,7 +73,7 @@ const PaperTracking = () => {
     // Optimistic update
     setCompletionStatus(prev => ({
       ...prev,
-      [statusKey]: newStatus
+      [statusKey]: { is_completed: newStatus, score }
     }));
     
     // Save to API
@@ -82,7 +83,8 @@ const PaperTracking = () => {
       session: session,
       paper: paper,
       timezone: timezone || null,
-      is_completed: newStatus
+      is_completed: newStatus,
+      score: score
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -91,16 +93,11 @@ const PaperTracking = () => {
         // Revert on error
         setCompletionStatus(prev => ({
           ...prev,
-          [statusKey]: isCompleted
+          [statusKey]: { is_completed: isCompleted, score: null }
         }));
         setError('Failed to update paper status');
         setTimeout(() => setError(''), 3000);
       });
-  };
-
-  const getSubjectName = (subjectId) => {
-    const subject = availableSubjects.find(s => s.id === subjectId);
-    return subject ? subject.name : subjectId;
   };
 
   const getPaperStatus = (subject, year, session, paper, timezone) => {
@@ -108,9 +105,27 @@ const PaperTracking = () => {
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
     
-    return completionStatus[key] || false;
+    return completionStatus[key]?.is_completed || false;
   };
-  
+
+  const getPaperScore = (subject, year, session, paper, timezone) => {
+    const key = timezone 
+      ? `${subject}-${year}-${session}-${paper}-${timezone}`
+      : `${subject}-${year}-${session}-${paper}`;
+    
+    return completionStatus[key]?.score || null;
+  };
+
+  const updatePaperScore = (subject, year, session, paper, timezone, score) => {
+    const isCompleted = getPaperStatus(subject, year, session, paper, timezone);
+    updatePaperStatus(subject, year, session, paper, timezone, !isCompleted, score);
+  };
+
+  const getSubjectName = (subjectId) => {
+    const subject = availableSubjects.find(s => s.id === subjectId);
+    return subject ? subject.name : subjectId;
+  };
+
   // Calculate combined status for papers with TZ variants
   const getCombinedStatus = (subject, year, session, paper) => {
     const hasTZ = tzConfig[subject]?.[paper.toLowerCase().replace(' ', '')];
@@ -194,6 +209,29 @@ const PaperTracking = () => {
       .filter(key => key.startsWith('paper'))
       .map(key => `Paper ${key.charAt(5)}`)
     : [];
+
+  const handleCheckboxChange = (subject, year, session, paper, timezone, isCompleted) => {
+    if (!isCompleted) {
+      // When marking as complete, show score dialog
+      setScoreDialog({
+        isOpen: true,
+        paperInfo: { subject, year, session, paper, timezone }
+      });
+    } else {
+      // When marking as incomplete, just update status
+      updatePaperStatus(subject, year, session, paper, timezone, isCompleted);
+    }
+  };
+
+  const handleScoreSubmit = (score) => {
+    const { subject, year, session, paper, timezone } = scoreDialog.paperInfo;
+    updatePaperStatus(subject, year, session, paper, timezone, false, score);
+    setScoreDialog({ isOpen: false, paperInfo: null });
+  };
+
+  const handleScoreCancel = () => {
+    setScoreDialog({ isOpen: false, paperInfo: null });
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -320,22 +358,29 @@ const PaperTracking = () => {
                             } else {
                               return (
                                 <td key={`${rowKey}-${paper}`} className="px-6 py-4 whitespace-nowrap">
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="checkbox"
-                                      className="form-checkbox h-5 w-5 text-blue-600 rounded"
-                                      checked={getPaperStatus(selectedSubject, year, session, paper)}
-                                      onChange={() => updatePaperStatus(
-                                        selectedSubject,
-                                        year,
-                                        session,
-                                        paper,
-                                        null,
-                                        getPaperStatus(selectedSubject, year, session, paper)
-                                      )}
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Completed</span>
-                                  </label>
+                                  <div className="flex items-center space-x-4">
+                                    <label className="inline-flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                        checked={getPaperStatus(selectedSubject, year, session, paper)}
+                                        onChange={() => handleCheckboxChange(
+                                          selectedSubject,
+                                          year,
+                                          session,
+                                          paper,
+                                          null,
+                                          getPaperStatus(selectedSubject, year, session, paper)
+                                        )}
+                                      />
+                                      <span className="ml-2 text-sm text-gray-700">Completed</span>
+                                    </label>
+                                    {getPaperStatus(selectedSubject, year, session, paper) && getPaperScore(selectedSubject, year, session, paper) !== null && (
+                                      <span className="text-sm text-gray-600">
+                                        Score: {getPaperScore(selectedSubject, year, session, paper)}%
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                               );
                             }
@@ -357,22 +402,30 @@ const PaperTracking = () => {
                                   <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3">
                                     <div className="flex flex-col space-y-2">
                                       {timezones.map(timezone => (
-                                        <label key={timezone} className="inline-flex items-center">
-                                          <input
-                                            type="checkbox"
-                                            className="form-checkbox h-5 w-5 text-blue-600 rounded"
-                                            checked={getPaperStatus(selectedSubject, year, session, paper, timezone)}
-                                            onChange={() => updatePaperStatus(
-                                              selectedSubject,
-                                              year,
-                                              session,
-                                              paper,
-                                              timezone,
-                                              getPaperStatus(selectedSubject, year, session, paper, timezone)
-                                            )}
-                                          />
-                                          <span className="ml-2 text-sm text-gray-700">{timezone}</span>
-                                        </label>
+                                        <div key={timezone} className="flex items-center space-x-4">
+                                          <label className="inline-flex items-center">
+                                            <input
+                                              type="checkbox"
+                                              className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                              checked={getPaperStatus(selectedSubject, year, session, paper, timezone)}
+                                              onChange={() => handleCheckboxChange(
+                                                selectedSubject,
+                                                year,
+                                                session,
+                                                paper,
+                                                timezone,
+                                                getPaperStatus(selectedSubject, year, session, paper, timezone)
+                                              )}
+                                            />
+                                            <span className="ml-2 text-sm text-gray-700">{timezone}</span>
+                                          </label>
+                                          {getPaperStatus(selectedSubject, year, session, paper, timezone) && 
+                                           getPaperScore(selectedSubject, year, session, paper, timezone) !== null && (
+                                            <span className="text-sm text-gray-600">
+                                              Score: {getPaperScore(selectedSubject, year, session, paper, timezone)}%
+                                            </span>
+                                          )}
+                                        </div>
                                       ))}
                                     </div>
                                   </td>
@@ -391,6 +444,42 @@ const PaperTracking = () => {
             </table>
           </div>
         </>
+      )}
+      
+      {/* Score Dialog */}
+      {scoreDialog.isOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Enter Score</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500 mb-4">
+                  {scoreDialog.paperInfo.paper} - {scoreDialog.paperInfo.session} {scoreDialog.paperInfo.year}
+                  {scoreDialog.paperInfo.timezone ? ` (${scoreDialog.paperInfo.timezone})` : ''}
+                </p>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  placeholder="Score (0-100)"
+                  onChange={(e) => {
+                    const score = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
+                    handleScoreSubmit(score);
+                  }}
+                />
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  onClick={handleScoreCancel}
+                  className="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

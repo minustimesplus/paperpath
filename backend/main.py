@@ -107,6 +107,7 @@ def init_db():
             paper TEXT NOT NULL,
             timezone TEXT,
             is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+            score INTEGER CHECK (score >= 0 AND score <= 100),
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
@@ -221,6 +222,7 @@ class CompletionStatus(BaseModel):
     paper: str
     timezone: Optional[str] = None
     is_completed: bool
+    score: Optional[int] = None
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
@@ -459,21 +461,21 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
             cursor.execute(
                 """
                 UPDATE completion_status 
-                SET is_completed = %s, updated_at = CURRENT_TIMESTAMP 
+                SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
                 WHERE id = %s
                 """,
-                (status.is_completed, existing[0])
+                (status.is_completed, status.score, existing[0])
             )
         else:
             # Create new status
             cursor.execute(
                 """
                 INSERT INTO completion_status 
-                (user_id, subject_id, year, session, paper, timezone, is_completed) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (current_user.id, status.subject_id, status.year, status.session, 
-                 status.paper, status.timezone, status.is_completed)
+                 status.paper, status.timezone, status.is_completed, status.score)
             )
         
         cursor.close()
@@ -495,7 +497,7 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
         
         cursor.execute(
             """
-            SELECT subject_id, year, session, paper, timezone, is_completed 
+            SELECT subject_id, year, session, paper, timezone, is_completed, score
             FROM completion_status 
             WHERE user_id = %s
             """, 
@@ -513,7 +515,10 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
                 key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}-{row[4]}"
             else:
                 key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}"
-            completion_data[key] = row[5]  # is_completed
+            completion_data[key] = {
+                "is_completed": row[5],
+                "score": row[6]
+            }
         
         return completion_data
     except Exception as e:
