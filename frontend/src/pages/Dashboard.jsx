@@ -22,9 +22,9 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 flex justify-between items-center">
           <div className="flex items-center">
-            <img src={logo} alt="IB Paper Tracker Logo" className="h-25 w-32 mr-3" />
+            <img src={logo} alt="IB Paper Tracker Logo" className="h-25 w-35 mr-3" />
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-gray-700">Hello, {currentUser?.username}</span>
