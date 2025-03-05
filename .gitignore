@@ -17,3 +17,4 @@ backend/**/.env
 *.sw?
 .DS_Store
 .code-workspace
+.gitignore
