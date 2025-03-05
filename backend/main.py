@@ -434,6 +434,7 @@ async def get_timezone_config():
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
     try:
+        print(f"Updating completion status: {status}")  # Debug log
         conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
@@ -458,6 +459,7 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
         
         if existing:
             # Update existing status
+            print(f"Updating existing status ID {existing[0]}")  # Debug log
             cursor.execute(
                 """
                 UPDATE completion_status 
@@ -468,6 +470,7 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
             )
         else:
             # Create new status
+            print(f"Creating new status")  # Debug log
             cursor.execute(
                 """
                 INSERT INTO completion_status 
@@ -508,6 +511,8 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
         cursor.close()
         conn.close()
         
+        print(f"Found {len(results)} completion records")  # Debug log
+        
         completion_data = {}
         for row in results:
             # Include timezone in the key if it exists
@@ -519,6 +524,7 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
                 "is_completed": row[5],
                 "score": row[6]
             }
+            print(f"Record: {key} = {completion_data[key]}")  # Debug log
         
         return completion_data
     except Exception as e:

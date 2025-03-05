@@ -69,12 +69,14 @@ const PaperTracking = () => {
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
     
+    // When marking as complete (isCompleted is false), we want to set it to true
+    // When marking as incomplete (isCompleted is true), we want to set it to false
     const newStatus = !isCompleted;
     
     // Optimistic update
     setCompletionStatus(prev => ({
       ...prev,
-      [statusKey]: { is_completed: newStatus, score }
+      [statusKey]: { is_completed: newStatus, score: newStatus ? score : null }
     }));
     
     // Save to API
@@ -85,7 +87,7 @@ const PaperTracking = () => {
       paper: paper,
       timezone: timezone || null,
       is_completed: newStatus,
-      score: score
+      score: newStatus ? score : null  // Clear score when marking as incomplete
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -106,7 +108,8 @@ const PaperTracking = () => {
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
     
-    return completionStatus[key]?.is_completed || false;
+    const status = completionStatus[key];
+    return status?.is_completed || false;
   };
 
   const getPaperScore = (subject, year, session, paper, timezone) => {
@@ -114,7 +117,8 @@ const PaperTracking = () => {
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
     
-    return completionStatus[key]?.score || null;
+    const status = completionStatus[key];
+    return status?.score || null;
   };
 
   const updatePaperScore = (subject, year, session, paper, timezone, score) => {
