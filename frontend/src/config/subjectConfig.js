@@ -2,6 +2,7 @@ export const availableSubjects = [
   // Group 1: Studies in Language and Literature
   { id: 'english_a_lit_sl', name: 'English A Literature SL', group: 1 },
   { id: 'english_a_lit_hl', name: 'English A Literature HL', group: 1 },
+  { id: 'english_a_sl', name: 'English A Literature SL', group: 1 },
   { id: 'english_a_lang_lit_sl', name: 'English A Language & Literature SL', group: 1 },
   { id: 'english_a_lang_lit_hl', name: 'English A Language & Literature HL', group: 1 },
   { id: 'german_a_sl', name: 'German A Literature SL', group: 1 },
@@ -36,8 +37,8 @@ export const availableSubjects = [
   { id: 'chemistry_hl', name: 'Chemistry HL', group: 4 },
   { id: 'physics_sl', name: 'Physics SL', group: 4 },
   { id: 'physics_hl', name: 'Physics HL', group: 4 },
-  { id: 'comp_sci_sl', name: 'Computer Science SL', group: 4 },
-  { id: 'comp_sci_hl', name: 'Computer Science HL', group: 4 },
+  { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
+  { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
   { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
 
   // Group 5: Mathematics

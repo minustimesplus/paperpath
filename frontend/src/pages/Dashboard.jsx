@@ -24,7 +24,7 @@ const Dashboard = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <img src={logo} alt="IB Paper Tracker Logo" className="h-12 w-20 mr-3" />
+            <img src={logo} alt="IB Paper Tracker Logo" className="h-20 w-30 mr-3" />
             <h1 className="text-2xl font-bold text-gray-900">IB Paper Tracker</h1>
           </div>
           <div className="flex items-center space-x-4">
