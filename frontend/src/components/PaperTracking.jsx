@@ -49,6 +49,8 @@ const PaperTracking = () => {
       axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
     ])
       .then(([subjectsResponse, completionResponse]) => {
+        console.log("Subjects response:", subjectsResponse.data);
+        console.log("Completion response:", completionResponse.data);
         setSubjects(subjectsResponse.data.subjects || []);
         setCompletionStatus(completionResponse.data || {});
         if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
@@ -73,26 +75,58 @@ const PaperTracking = () => {
     // When marking as incomplete (isCompleted is true), we want to set it to false
     const newStatus = !isCompleted;
     
+    console.log(`[DEBUG] Updating paper status:`, {
+      statusKey,
+      subject,
+      year,
+      session,
+      paper,
+      timezone,
+      isCompleted,
+      newStatus,
+      score
+    });
+    
     // Optimistic update
-    setCompletionStatus(prev => ({
-      ...prev,
-      [statusKey]: { is_completed: newStatus, score: newStatus ? score : null }
-    }));
+    setCompletionStatus(prev => {
+      const newState = {
+        ...prev,
+        [statusKey]: { is_completed: newStatus, score: newStatus ? score : null }
+      };
+      console.log('[DEBUG] New completion state:', newState);
+      return newState;
+    });
     
     // Save to API
-    axios.post(`${API_URL}/completion`, {
+    const requestData = {
       subject_id: subject,
       year: year,
       session: session,
       paper: paper,
       timezone: timezone || null,
       is_completed: newStatus,
-      score: newStatus ? score : null  // Clear score when marking as incomplete
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
+      score: newStatus ? score : null
+    };
+    
+    console.log('[DEBUG] Sending API request:', requestData);
+    
+    axios.post(`${API_URL}/completion`, requestData, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     })
+      .then(response => {
+        console.log('[DEBUG] API response:', response.data);
+      })
       .catch(err => {
-        console.error('Error updating completion status:', err);
+        console.error('[ERROR] Error updating completion status:', err);
+        console.error('[ERROR] Error details:', {
+          status: err.response?.status,
+          data: err.response?.data,
+          headers: err.response?.headers
+        });
+        
         // Revert on error
         setCompletionStatus(prev => ({
           ...prev,

@@ -434,7 +434,9 @@ async def get_timezone_config():
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
     try:
-        print(f"Updating completion status: {status}")  # Debug log
+        print(f"[DEBUG] Updating completion status for user {current_user.id}:")
+        print(f"[DEBUG] Status data: {status}")
+        
         conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = True
         cursor = conn.cursor()
@@ -454,12 +456,14 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
         else:
             query += " AND (timezone IS NULL OR timezone = '')"
             
+        print(f"[DEBUG] Executing query: {query}")
+        print(f"[DEBUG] With params: {params}")
         cursor.execute(query, params)
         existing = cursor.fetchone()
         
         if existing:
             # Update existing status
-            print(f"Updating existing status ID {existing[0]}")  # Debug log
+            print(f"[DEBUG] Updating existing status ID {existing[0]}")
             cursor.execute(
                 """
                 UPDATE completion_status 
@@ -470,7 +474,7 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
             )
         else:
             # Create new status
-            print(f"Creating new status")  # Debug log
+            print(f"[DEBUG] Creating new status")
             cursor.execute(
                 """
                 INSERT INTO completion_status 
@@ -480,13 +484,14 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
                 (current_user.id, status.subject_id, status.year, status.session, 
                  status.paper, status.timezone, status.is_completed, status.score)
             )
+            print(f"[DEBUG] New status created successfully")
         
         cursor.close()
         conn.close()
         
         return {"status": "success"}
     except Exception as e:
-        print(f"Error updating completion status: {e}")
+        print(f"[ERROR] Error updating completion status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error updating completion status"
@@ -495,23 +500,20 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
 @app.get("/completion")
 async def get_completion(current_user: UserInDB = Depends(get_current_user)):
     try:
+        print(f"[DEBUG] Fetching completion data for user {current_user.id}")
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         
-        cursor.execute(
-            """
+        query = """
             SELECT subject_id, year, session, paper, timezone, is_completed, score
             FROM completion_status 
             WHERE user_id = %s
-            """, 
-            (current_user.id,)
-        )
+        """
+        print(f"[DEBUG] Executing query: {query}")
+        cursor.execute(query, (current_user.id,))
         
         results = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        
-        print(f"Found {len(results)} completion records")  # Debug log
+        print(f"[DEBUG] Found {len(results)} completion records")
         
         completion_data = {}
         for row in results:
@@ -524,11 +526,14 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
                 "is_completed": row[5],
                 "score": row[6]
             }
-            print(f"Record: {key} = {completion_data[key]}")  # Debug log
+            print(f"[DEBUG] Record {key}: {completion_data[key]}")
+        
+        cursor.close()
+        conn.close()
         
         return completion_data
     except Exception as e:
-        print(f"Error getting completion data: {e}")
+        print(f"[ERROR] Error getting completion data: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving completion data"
