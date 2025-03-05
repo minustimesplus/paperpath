@@ -30,7 +30,7 @@ const Dashboard = () => {
             <span className="text-gray-700">Hello, {currentUser?.username}</span>
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-0.25 px-3 rounded text-sm"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
             >
               Logout
             </button>
