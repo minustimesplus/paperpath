@@ -26,7 +26,7 @@ const PaperTracking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
-  const [scoreDialog, setScoreDialog] = useState({ isOpen: false, paperInfo: null });
+  const [scoreDialog, setScoreDialog] = useState({ isOpen: false, paperInfo: null, tempScore: '' });
 
   // Toggle row expansion
   const toggleRowExpansion = (rowKey) => {
@@ -215,7 +215,7 @@ const PaperTracking = () => {
       // When marking as complete, show score dialog
       setScoreDialog({
         isOpen: true,
-        paperInfo: { subject, year, session, paper, timezone }
+        paperInfo: { subject, year, session, paper, timezone, tempScore: '' }
       });
     } else {
       // When marking as incomplete, just update status
@@ -223,14 +223,23 @@ const PaperTracking = () => {
     }
   };
 
-  const handleScoreSubmit = (score) => {
-    const { subject, year, session, paper, timezone } = scoreDialog.paperInfo;
+  const handleScoreSubmit = () => {
+    const { subject, year, session, paper, timezone, tempScore } = scoreDialog.paperInfo;
+    const score = Math.min(100, Math.max(0, parseInt(tempScore) || 0));
     updatePaperStatus(subject, year, session, paper, timezone, false, score);
-    setScoreDialog({ isOpen: false, paperInfo: null });
+    setScoreDialog({ isOpen: false, paperInfo: null, tempScore: '' });
+  };
+
+  const handleScoreChange = (e) => {
+    const value = e.target.value;
+    setScoreDialog(prev => ({
+      ...prev,
+      paperInfo: { ...prev.paperInfo, tempScore: value }
+    }));
   };
 
   const handleScoreCancel = () => {
-    setScoreDialog({ isOpen: false, paperInfo: null });
+    setScoreDialog({ isOpen: false, paperInfo: null, tempScore: '' });
   };
 
   return (
@@ -461,15 +470,20 @@ const PaperTracking = () => {
                   type="number"
                   min="0"
                   max="100"
+                  value={scoreDialog.paperInfo.tempScore}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                   placeholder="Score (0-100)"
-                  onChange={(e) => {
-                    const score = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
-                    handleScoreSubmit(score);
-                  }}
+                  onChange={handleScoreChange}
                 />
               </div>
-              <div className="items-center px-4 py-3">
+              <div className="items-center px-4 py-3 space-x-4">
+                <button
+                  onClick={handleScoreSubmit}
+                  disabled={!scoreDialog.paperInfo.tempScore}
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  Confirm
+                </button>
                 <button
                   onClick={handleScoreCancel}
                   className="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
