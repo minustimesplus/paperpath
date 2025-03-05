@@ -96,7 +96,7 @@ def init_db():
         )
         ''')
         
-        # Create completion status table with timezone field
+        # Create completion status table with timezone field and score
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS completion_status (
             id SERIAL PRIMARY KEY,
@@ -112,6 +112,21 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
         ''')
+
+        # Check if score column exists and add it if it doesn't
+        cursor.execute("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='completion_status' AND column_name='score'
+        """)
+        
+        if not cursor.fetchone():
+            print("[DEBUG] Adding score column to completion_status table...")
+            cursor.execute("""
+            ALTER TABLE completion_status 
+            ADD COLUMN score INTEGER CHECK (score >= 0 AND score <= 100)
+            """)
+            print("[DEBUG] Score column added successfully")
         
         cursor.close()
         conn.close()
