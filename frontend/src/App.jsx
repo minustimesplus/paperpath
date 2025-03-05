@@ -4,62 +4,302 @@ import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
 
-// Create a global context for timezone configuration
-const TimezoneConfigContext = React.createContext({});
-
-// Context provider component
-const TimezoneConfigProvider = ({ children }) => {
-  const [timezoneConfig, setTimezoneConfig] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    // Fetch the timezone configuration from the JSON file
-    fetch('timezone-config.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load timezone configuration: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setTimezoneConfig(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error loading timezone configuration:', err);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  return (
-    <TimezoneConfigContext.Provider value={{ timezoneConfig, loading, error }}>
-      {children}
-    </TimezoneConfigContext.Provider>
-  );
-};
-
-// Custom hook to use the timezone configuration
-const useTimezoneConfig = () => {
-  return React.useContext(TimezoneConfigContext);
+// Import the timezone configuration directly
+// In a real application, you would create this as a separate file
+// and import it like: import TIMEZONE_CONFIG from './timezone-config.json';
+const TIMEZONE_CONFIG = {
+  "english_a_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_a_language_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_language_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "literature_performance_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "german_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "german_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "french_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "french_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "spanish_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "spanish_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "english_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "language_ab_initio_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "latin_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "latin_hl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "business_management_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "business_management_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "economics_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "economics_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": false
+  },
+  "geography_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "geography_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "global_politics_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "global_politics_hl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "history_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "history_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "itgs_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "itgs_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "philosophy_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "philosophy_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "psychology_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "psychology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "anthropology_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "anthropology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "biology_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "biology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "computer_science_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "computer_science_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "design_tech_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "design_tech_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "ess_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "physics_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "physics_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "sports_science_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "sports_science_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "math_aa_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_aa_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "math_ai_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_ai_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "dance_sl": {
+    "paper1": false
+  },
+  "dance_hl": {
+    "paper1": false
+  },
+  "film_sl": {
+    "paper1": false
+  },
+  "film_hl": {
+    "paper1": false
+  },
+  "music_sl": {
+    "paper1": true
+  },
+  "music_hl": {
+    "paper1": true
+  },
+  "theatre_sl": {},
+  "theatre_hl": {},
+  "visual_arts_sl": {},
+  "visual_arts_hl": {}
 };
 
 // Helper functions for timezone variants
-const hasTZVariants = (config, subjectId, paper) => {
+const hasTZVariants = (subjectId, paper) => {
   const paperKey = paper.toLowerCase().replace(' ', '');
-  if (!config[subjectId] || !config[subjectId][paperKey]) {
+  if (!TIMEZONE_CONFIG[subjectId] || !TIMEZONE_CONFIG[subjectId][paperKey]) {
     return false;
   }
-  return config[subjectId][paperKey];
+  return TIMEZONE_CONFIG[subjectId][paperKey];
 };
 
-const subjectHasTZVariants = (config, subjectId) => {
-  if (!config[subjectId]) {
+const subjectHasTZVariants = (subjectId) => {
+  if (!TIMEZONE_CONFIG[subjectId]) {
     return false;
   }
   
-  return Object.values(config[subjectId]).some(hasTZ => hasTZ === true);
+  return Object.values(TIMEZONE_CONFIG[subjectId]).some(hasTZ => hasTZ === true);
 };
 
 // Auth Context
@@ -550,7 +790,6 @@ const SubjectSelection = ({ onSubjectsChange }) => {
 // Paper Tracking Component with TZ support
 const PaperTracking = () => {
   const { token } = useAuth();
-  const { timezoneConfig, loading: configLoading, error: configError } = useTimezoneConfig();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
   const [availableSubjects, setAvailableSubjects] = useState([
@@ -646,7 +885,7 @@ const PaperTracking = () => {
   };
   
   // Check if this selected subject has any papers with TZ variants
-  const subjectHasAnyTZVariants = selectedSubject && !configLoading ? subjectHasTZVariants(timezoneConfig, selectedSubject) : false;
+  const subjectHasAnyTZVariants = selectedSubject ? subjectHasTZVariants(selectedSubject) : false;
 
   useEffect(() => {
     // Fetch user's subjects
@@ -723,7 +962,7 @@ const PaperTracking = () => {
   
   // Calculate combined status for papers with TZ variants
   const getCombinedStatus = (subject, year, session, paper) => {
-    if (!hasTZVariants(timezoneConfig, subject, paper)) {
+    if (!hasTZVariants(subject, paper)) {
       return getPaperStatus(subject, year, session, paper) ? 'completed' : 'incomplete';
     }
     
@@ -741,7 +980,7 @@ const PaperTracking = () => {
   
   // Calculate completion statistics
   const calculateStats = () => {
-    if (!selectedSubject || configLoading) return { completed: 0, total: 0, percentage: 0 };
+    if (!selectedSubject) return { completed: 0, total: 0, percentage: 0 };
     
     let completed = 0;
     let total = 0;
@@ -749,15 +988,17 @@ const PaperTracking = () => {
     years.forEach(year => {
       sessions.forEach(session => {
         // Determine which papers to check based on subject
-        const papersList = Object.keys(timezoneConfig[selectedSubject] || {})
+        const papersList = Object.keys(TIMEZONE_CONFIG[selectedSubject] || {})
           .filter(key => key.startsWith('paper'))
           .map(key => `Paper ${key.charAt(5)}`);
         
-        if (papersList.length === 0) return;
+        if (papersList.length === 0) {
+          return;
+        }
         
         papersList.forEach(paper => {
           // Check if this paper has TZ variants
-          if (hasTZVariants(timezoneConfig, selectedSubject, paper)) {
+          if (hasTZVariants(selectedSubject, paper)) {
             // Count each timezone variant
             timezones.forEach(timezone => {
               total++;
@@ -785,12 +1026,8 @@ const PaperTracking = () => {
   
   const stats = calculateStats();
 
-  if (loading || configLoading) {
+  if (loading) {
     return <div className="text-center py-4">Loading your papers...</div>;
-  }
-  
-  if (configError) {
-    return <div className="text-center py-4 text-red-500">Error loading timezone configuration: {configError}</div>;
   }
 
   if (subjects.length === 0) {
@@ -803,8 +1040,8 @@ const PaperTracking = () => {
   }
 
   // Get available papers for the selected subject
-  const availablePapers = selectedSubject && !configLoading && timezoneConfig[selectedSubject] 
-    ? Object.keys(timezoneConfig[selectedSubject])
+  const availablePapers = selectedSubject && TIMEZONE_CONFIG[selectedSubject] 
+    ? Object.keys(TIMEZONE_CONFIG[selectedSubject])
       .filter(key => key.startsWith('paper'))
       .map(key => `Paper ${key.charAt(5)}`)
     : [];
@@ -885,7 +1122,7 @@ const PaperTracking = () => {
                     const isExpanded = expandedRows[rowKey] || false;
                     // Check if any paper in this row has TZ variants
                     const rowHasTZVariants = availablePapers
-                      .some(paper => hasTZVariants(timezoneConfig, selectedSubject, paper));
+                      .some(paper => hasTZVariants(selectedSubject, paper));
                     
                     return (
                       <React.Fragment key={rowKey}>
@@ -914,7 +1151,7 @@ const PaperTracking = () => {
                           
                           {/* Show status for each paper */}
                           {availablePapers.map(paper => {
-                            const paperHasTZ = hasTZVariants(timezoneConfig, selectedSubject, paper);
+                            const paperHasTZ = hasTZVariants(selectedSubject, paper);
                             const status = getCombinedStatus(selectedSubject, year, session, paper);
                             
                             if (paperHasTZ) {
@@ -971,7 +1208,7 @@ const PaperTracking = () => {
                             </td>
                             
                             {availablePapers.map(paper => {
-                              if (hasTZVariants(timezoneConfig, selectedSubject, paper)) {
+                              if (hasTZVariants(selectedSubject, paper)) {
                                 return (
                                   <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3">
                                     <div className="flex flex-col space-y-2">
@@ -1078,22 +1315,20 @@ const Dashboard = () => {
 // App Component
 const App = () => {
   return (
-    <TimezoneConfigProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </TimezoneConfigProvider>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
