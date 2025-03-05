@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTimezoneConfig } from '../contexts/TimezoneContext';
+import { getSubjectName } from '../config/subjectConfig';
 import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
@@ -119,11 +120,6 @@ const PaperTracking = () => {
   const updatePaperScore = (subject, year, session, paper, timezone, score) => {
     const isCompleted = getPaperStatus(subject, year, session, paper, timezone);
     updatePaperStatus(subject, year, session, paper, timezone, !isCompleted, score);
-  };
-
-  const getSubjectName = (subjectId) => {
-    const subject = availableSubjects.find(s => s.id === subjectId);
-    return subject ? subject.name : subjectId;
   };
 
   // Calculate combined status for papers with TZ variants

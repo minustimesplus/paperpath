@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { getSubjectName, groupedSubjects } from '../config/subjectConfig';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
-
-// Available subjects configuration
-const availableSubjects = [
-  // Group 1: Studies in Language and Literature
-  { id: 'english_a_literature_sl', name: 'English A Literature SL', group: 1 },
-  { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
-  // ...rest of available subjects...
-];
 
 const SubjectSelection = ({ onSubjectsChange }) => {
   const { token } = useAuth();
@@ -52,21 +45,6 @@ const SubjectSelection = ({ onSubjectsChange }) => {
         console.error('Error updating subjects:', err);
         setError('Failed to update subjects');
       });
-  };
-
-  const getSubjectName = (subjectId) => {
-    const subject = availableSubjects.find(s => s.id === subjectId);
-    return subject ? subject.name : subjectId;
-  };
-
-  // Group subjects by category
-  const groupedSubjects = {
-    'Group 1 - Studies in Language and Literature': availableSubjects.filter(s => s.group === 1),
-    'Group 2 - Language Acquisition': availableSubjects.filter(s => s.group === 2),
-    'Group 3 - Individuals and Societies': availableSubjects.filter(s => s.group === 3),
-    'Group 4 - Sciences': availableSubjects.filter(s => s.group === 4),
-    'Group 5 - Mathematics': availableSubjects.filter(s => s.group === 5),
-    'Group 6 - The Arts': availableSubjects.filter(s => s.group === 6)
   };
 
   return (
