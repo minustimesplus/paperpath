@@ -1,7 +1,4 @@
-# IB Past Paper Tracker
 
-An application to help IB students track their past paper completion and analyze their performance.
-=======
 # Paperpath
 
 A web application designed to help International Baccalaureate (IB) students track their past paper practice, organize by subject groups, and monitor their exam preparation progress.
