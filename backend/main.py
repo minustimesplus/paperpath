@@ -517,14 +517,17 @@ async def get_completion(current_user: UserInDB = Depends(get_current_user)):
         
         completion_data = {}
         for row in results:
+            subject_id, year, session, paper, timezone, is_completed, score = row
             # Include timezone in the key if it exists
-            if row[4]:  # timezone
-                key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}-{row[4]}"
+            if timezone:  # timezone
+                key = f"{subject_id}-{year}-{session}-{paper}-{timezone}"
             else:
-                key = f"{row[0]}-{row[1]}-{row[2]}-{row[3]}"
+                key = f"{subject_id}-{year}-{session}-{paper}"
+                
+            # Always return an object with is_completed and score properties
             completion_data[key] = {
-                "is_completed": row[5],
-                "score": row[6]
+                "is_completed": bool(is_completed),  # Ensure boolean
+                "score": score if score is not None else None
             }
             print(f"[DEBUG] Record {key}: {completion_data[key]}")
         
