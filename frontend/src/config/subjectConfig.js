@@ -1,10 +1,9 @@
 export const availableSubjects = [
   // Group 1: Studies in Language and Literature
-  { id: 'english_a_lit_sl', name: 'English A Literature SL', group: 1 },
-  { id: 'english_a_lit_hl', name: 'English A Literature HL', group: 1 },
-  { id: 'english_a_sl', name: 'English A Literature SL', group: 1 },
-  { id: 'english_a_lang_lit_sl', name: 'English A Language & Literature SL', group: 1 },
-  { id: 'english_a_lang_lit_hl', name: 'English A Language & Literature HL', group: 1 },
+  { id: 'english_a_literature_sl', name: 'English A Literature SL', group: 1 },
+  { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
+  { id: 'english_a_language_literature_sl', name: 'English A Language & Literature SL', group: 1 },
+  { id: 'english_a_language_literature_hl', name: 'English A Language & Literature HL', group: 1 },
   { id: 'german_a_sl', name: 'German A Literature SL', group: 1 },
   { id: 'german_a_hl', name: 'German A Literature HL', group: 1 },
 
