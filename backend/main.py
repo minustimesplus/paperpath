@@ -308,6 +308,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         
     return user
 
+# Update the get_current_user function to handle optional auth
+async def get_current_user_optional(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+        user = get_user(username=username)
+        if user is None:
+            return None
+        return user
+    except Exception:
+        return None
+
 # Routes
 @app.post("/register", response_model=Token)
 async def register_user(user: User):
@@ -452,64 +466,70 @@ async def get_timezone_config():
     return {"timezone_config": TIMEZONE_CONFIG}
 
 @app.post("/completion")
-async def update_completion(status: CompletionStatus, current_user: UserInDB = Depends(get_current_user)):
+async def update_completion(status: CompletionStatus, current_user: Optional[UserInDB] = Depends(get_current_user_optional)):
     try:
-        print(f"[DEBUG] Updating completion status for user {current_user.id}:")
+        print(f"[DEBUG] Updating completion status:")
         print(f"[DEBUG] Status data: {status}")
         
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
-        cursor = conn.cursor()
-        
-        # Check if this specific paper status already exists
-        query = """
-            SELECT id FROM completion_status 
-            WHERE user_id = %s AND subject_id = %s AND year = %s 
-            AND session = %s AND paper = %s
-        """
-        params = [current_user.id, status.subject_id, status.year, status.session, status.paper]
-        
-        # Add timezone to query if provided
-        if status.timezone:
-            query += " AND timezone = %s"
-            params.append(status.timezone)
-        else:
-            query += " AND (timezone IS NULL OR timezone = '')"
+        if current_user:
+            # Existing code for authenticated users
+            conn = psycopg2.connect(DATABASE_URL)
+            conn.autocommit = True
+            cursor = conn.cursor()
             
-        print(f"[DEBUG] Executing query: {query}")
-        print(f"[DEBUG] With params: {params}")
-        cursor.execute(query, params)
-        existing = cursor.fetchone()
-        
-        if existing:
-            # Update existing status
-            print(f"[DEBUG] Updating existing status ID {existing[0]}")
-            cursor.execute(
-                """
-                UPDATE completion_status 
-                SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
-                WHERE id = %s
-                """,
-                (status.is_completed, status.score, existing[0])
-            )
+            # Check if this specific paper status already exists
+            query = """
+                SELECT id FROM completion_status 
+                WHERE user_id = %s AND subject_id = %s AND year = %s 
+                AND session = %s AND paper = %s
+            """
+            params = [current_user.id, status.subject_id, status.year, status.session, status.paper]
+            
+            # Add timezone to query if provided
+            if status.timezone:
+                query += " AND timezone = %s"
+                params.append(status.timezone)
+            else:
+                query += " AND (timezone IS NULL OR timezone = '')"
+                
+            print(f"[DEBUG] Executing query: {query}")
+            print(f"[DEBUG] With params: {params}")
+            cursor.execute(query, params)
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Update existing status
+                print(f"[DEBUG] Updating existing status ID {existing[0]}")
+                cursor.execute(
+                    """
+                    UPDATE completion_status 
+                    SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = %s
+                    """,
+                    (status.is_completed, status.score, existing[0])
+                )
+            else:
+                # Create new status
+                print(f"[DEBUG] Creating new status")
+                cursor.execute(
+                    """
+                    INSERT INTO completion_status 
+                    (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (current_user.id, status.subject_id, status.year, status.session, 
+                     status.paper, status.timezone, status.is_completed, status.score)
+                )
+                print(f"[DEBUG] New status created successfully")
+            
+            cursor.close()
+            conn.close()
+            
+            return {"status": "success"}
         else:
-            # Create new status
-            print(f"[DEBUG] Creating new status")
-            cursor.execute(
-                """
-                INSERT INTO completion_status 
-                (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                (current_user.id, status.subject_id, status.year, status.session, 
-                 status.paper, status.timezone, status.is_completed, status.score)
-            )
-            print(f"[DEBUG] New status created successfully")
-        
-        cursor.close()
-        conn.close()
-        
-        return {"status": "success"}
+            # For anonymous users, just return success since they'll use local storage
+            return {"status": "success"}
+            
     except Exception as e:
         print(f"[ERROR] Error updating completion status: {e}")
         raise HTTPException(
@@ -518,56 +538,56 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
         )
 
 @app.post("/completion/bulk")
-async def bulk_update_completion(data: BulkCompletionStatus, current_user: UserInDB = Depends(get_current_user)):
+async def bulk_update_completion(data: BulkCompletionStatus, current_user: Optional[UserInDB] = Depends(get_current_user_optional)):
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
-        cursor = conn.cursor()
-        
-        for key, value in data.completion_data.items():
-            # Parse the composite key
-            subject_id, year, session, paper, *timezone_part = key.split('-')
-            timezone = timezone_part[0] if timezone_part else None
+        if current_user:
+            # Existing code for authenticated users
+            conn = psycopg2.connect(DATABASE_URL)
+            conn.autocommit = True
+            cursor = conn.cursor()
             
-            # Check if this specific paper status already exists
-            query = """
-                SELECT id FROM completion_status 
-                WHERE user_id = %s AND subject_id = %s AND year = %s 
-                AND session = %s AND paper = %s
-            """
-            params = [current_user.id, subject_id, int(year), session, paper]
-            
-            if timezone:
-                query += " AND timezone = %s"
-                params.append(timezone)
-            else:
-                query += " AND (timezone IS NULL OR timezone = '')"
+            for key, value in data.completion_data.items():
+                subject_id, year, session, paper, *timezone_part = key.split('-')
+                timezone = timezone_part[0] if timezone_part else None
                 
-            cursor.execute(query, params)
-            existing = cursor.fetchone()
+                query = """
+                    SELECT id FROM completion_status 
+                    WHERE user_id = %s AND subject_id = %s AND year = %s 
+                    AND session = %s AND paper = %s
+                """
+                params = [current_user.id, subject_id, int(year), session, paper]
+                
+                if timezone:
+                    query += " AND timezone = %s"
+                    params.append(timezone)
+                else:
+                    query += " AND (timezone IS NULL OR timezone = '')"
+                    
+                cursor.execute(query, params)
+                existing = cursor.fetchone()
+                
+                if existing:
+                    cursor.execute(
+                        """
+                        UPDATE completion_status 
+                        SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
+                        WHERE id = %s
+                        """,
+                        (value['is_completed'], value.get('score'), existing[0])
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        INSERT INTO completion_status 
+                        (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (current_user.id, subject_id, int(year), session, paper, 
+                         timezone, value['is_completed'], value.get('score'))
+                    )
             
-            if existing:
-                cursor.execute(
-                    """
-                    UPDATE completion_status 
-                    SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
-                    WHERE id = %s
-                    """,
-                    (value['is_completed'], value.get('score'), existing[0])
-                )
-            else:
-                cursor.execute(
-                    """
-                    INSERT INTO completion_status 
-                    (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (current_user.id, subject_id, int(year), session, paper, 
-                     timezone, value['is_completed'], value.get('score'))
-                )
-        
-        cursor.close()
-        conn.close()
+            cursor.close()
+            conn.close()
         
         return {"status": "success", "message": "Bulk completion status updated"}
     except Exception as e:
@@ -578,8 +598,13 @@ async def bulk_update_completion(data: BulkCompletionStatus, current_user: UserI
         )
 
 @app.get("/completion")
-async def get_completion(current_user: UserInDB = Depends(get_current_user)):
+async def get_completion(current_user: Optional[UserInDB] = Depends(get_current_user_optional)):
     try:
+        if not current_user:
+            # For anonymous users, return empty completion data
+            # They will use local storage on the frontend
+            return {}
+            
         print(f"[DEBUG] Fetching completion data for user {current_user.id}")
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
