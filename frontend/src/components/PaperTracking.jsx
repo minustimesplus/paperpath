@@ -19,7 +19,7 @@ const availableSubjects = [
 ];
 
 const PaperTracking = () => {
-  const { token } = useAuth();
+  const { token, currentUser, localCompletionStatus, setLocalCompletionStatus, localSubjects } = useAuth();
   const { tzConfig, loading: tzLoading } = useTimezoneConfig();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
@@ -43,98 +43,83 @@ const PaperTracking = () => {
     false;
 
   useEffect(() => {
-    // Fetch user's subjects and completion status
-    Promise.all([
-      axios.get(`${API_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
-    ])
-      .then(([subjectsResponse, completionResponse]) => {
-        console.log("Subjects response:", subjectsResponse.data);
-        console.log("Completion response:", completionResponse.data);
-        setSubjects(subjectsResponse.data.subjects || []);
-        setCompletionStatus(completionResponse.data || {});
-        if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
-          setSelectedSubject(subjectsResponse.data.subjects[0]);
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching data:', err);
-        setError('Failed to load your data. Please try again later.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [token]);
+    if (currentUser) {
+      // Fetch from server if logged in
+      Promise.all([
+        axios.get(`${API_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
+      ])
+        .then(([subjectsResponse, completionResponse]) => {
+          setSubjects(subjectsResponse.data.subjects || []);
+          setCompletionStatus(completionResponse.data || {});
+          if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
+            setSelectedSubject(subjectsResponse.data.subjects[0]);
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching data:', err);
+          setError('Failed to load your data. Please try again later.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      // Use local storage for anonymous users
+      setSubjects(localSubjects);
+      setCompletionStatus(localCompletionStatus);
+      if (localSubjects.length > 0) {
+        setSelectedSubject(localSubjects[0]);
+      }
+      setLoading(false);
+    }
+  }, [token, currentUser, localSubjects, localCompletionStatus]);
 
   const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted, score = null) => {
     const statusKey = timezone 
       ? `${subject}-${year}-${session}-${paper}-${timezone}`
       : `${subject}-${year}-${session}-${paper}`;
     
-    // When marking as complete (isCompleted is false), we want to set it to true
-    // When marking as incomplete (isCompleted is true), we want to set it to false
     const newStatus = !isCompleted;
     
-    console.log(`[DEBUG] Updating paper status:`, {
-      statusKey,
-      subject,
-      year,
-      session,
-      paper,
-      timezone,
-      isCompleted,
-      newStatus,
-      score
-    });
-    
-    // Optimistic update
-    setCompletionStatus(prev => {
-      const newState = {
+    if (currentUser) {
+      // Update server if logged in
+      setCompletionStatus(prev => ({
         ...prev,
         [statusKey]: { is_completed: newStatus, score: newStatus ? score : null }
+      }));
+      
+      const requestData = {
+        subject_id: subject,
+        year: year,
+        session: session,
+        paper: paper,
+        timezone: timezone || null,
+        is_completed: newStatus,
+        score: newStatus ? score : null
       };
-      console.log('[DEBUG] New completion state:', newState);
-      return newState;
-    });
-    
-    // Save to API
-    const requestData = {
-      subject_id: subject,
-      year: year,
-      session: session,
-      paper: paper,
-      timezone: timezone || null,
-      is_completed: newStatus,
-      score: newStatus ? score : null
-    };
-    
-    console.log('[DEBUG] Sending API request:', requestData);
-    
-    axios.post(`${API_URL}/completion`, requestData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-        console.log('[DEBUG] API response:', response.data);
+      
+      axios.post(`${API_URL}/completion`, requestData, {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .catch(err => {
-        console.error('[ERROR] Error updating completion status:', err);
-        console.error('[ERROR] Error details:', {
-          status: err.response?.status,
-          data: err.response?.data,
-          headers: err.response?.headers
+        .catch(err => {
+          console.error('Error updating completion status:', err);
+          setCompletionStatus(prev => ({
+            ...prev,
+            [statusKey]: { is_completed: isCompleted, score: null }
+          }));
+          setError('Failed to update paper status');
+          setTimeout(() => setError(''), 3000);
         });
-        
-        // Revert on error
-        setCompletionStatus(prev => ({
-          ...prev,
-          [statusKey]: { is_completed: isCompleted, score: null }
-        }));
-        setError('Failed to update paper status');
-        setTimeout(() => setError(''), 3000);
-      });
+    } else {
+      // Update local storage for anonymous users
+      const newCompletionStatus = {
+        ...localCompletionStatus,
+        [statusKey]: { is_completed: newStatus, score: newStatus ? score : null }
+      };
+      
+      setLocalCompletionStatus(newCompletionStatus);
+      setCompletionStatus(newCompletionStatus);
+    }
   };
 
   const getPaperStatus = (subject, year, session, paper, timezone) => {

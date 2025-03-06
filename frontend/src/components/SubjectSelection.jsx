@@ -6,45 +6,60 @@ import { getSubjectName, groupedSubjects } from '../config/subjectConfig';
 const API_URL = 'https://papertrackerforib.onrender.com';
 
 const SubjectSelection = ({ onSubjectsChange }) => {
-  const { token } = useAuth();
+  const { token, currentUser, localSubjects, setLocalSubjects } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch user's subjects
-    axios.get(`${API_URL}/subjects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        setSubjects(response.data.subjects || []);
+    if (currentUser) {
+      // Fetch user's subjects from server if logged in
+      axios.get(`${API_URL}/subjects`, {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .catch(err => {
-        console.error('Error fetching subjects:', err);
-      });
-  }, [token]);
+        .then(response => {
+          setSubjects(response.data.subjects || []);
+        })
+        .catch(err => {
+          console.error('Error fetching subjects:', err);
+        });
+    } else {
+      // Use local subjects for anonymous users
+      setSubjects(localSubjects);
+    }
+  }, [token, currentUser, localSubjects]);
 
   const toggleSubject = (subjectId) => {
     let newSubjects = subjects.includes(subjectId)
       ? subjects.filter(s => s !== subjectId)
       : [...subjects, subjectId];
     
-    // Save to API
-    axios.post(`${API_URL}/subjects`, { subjects: newSubjects }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setSubjects(newSubjects);
-        setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
-        setError('');
-        setTimeout(() => setMessage(''), 3000);
-        if (onSubjectsChange) onSubjectsChange();
+    if (currentUser) {
+      // Save to API if logged in
+      axios.post(`${API_URL}/subjects`, { subjects: newSubjects }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .catch(err => {
-        console.error('Error updating subjects:', err);
-        setError('Failed to update subjects');
-      });
+        .then(() => {
+          setSubjects(newSubjects);
+          setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
+          setError('');
+          setTimeout(() => setMessage(''), 3000);
+          if (onSubjectsChange) onSubjectsChange();
+        })
+        .catch(err => {
+          console.error('Error updating subjects:', err);
+          setError('Failed to update subjects');
+        });
+    } else {
+      // Save to local storage if anonymous
+      setLocalSubjects(newSubjects);
+      setSubjects(newSubjects);
+      setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
+      setError('');
+      setTimeout(() => setMessage(''), 3000);
+      if (onSubjectsChange) onSubjectsChange();
+    }
   };
 
   return (

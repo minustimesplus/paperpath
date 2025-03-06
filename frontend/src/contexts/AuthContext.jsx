@@ -13,6 +13,12 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [localCompletionStatus, setLocalCompletionStatus] = useState(
+    JSON.parse(localStorage.getItem('localCompletionStatus') || '{}')
+  );
+  const [localSubjects, setLocalSubjects] = useState(
+    JSON.parse(localStorage.getItem('localSubjects') || '[]')
+  );
 
   useEffect(() => {
     if (token) {
@@ -34,6 +40,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  // Save local completion status to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('localCompletionStatus', JSON.stringify(localCompletionStatus));
+  }, [localCompletionStatus]);
+
+  // Save local subjects to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('localSubjects', JSON.stringify(localSubjects));
+  }, [localSubjects]);
+
   const login = async (username, password) => {
     const formData = new FormData();
     formData.append('username', username);
@@ -47,6 +63,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (username, email, password) => {
+    // First register the user
     const response = await axios.post(`${API_URL}/register`, {
       username,
       email,
@@ -55,6 +72,51 @@ export const AuthProvider = ({ children }) => {
     const accessToken = response.data.access_token;
     localStorage.setItem('token', accessToken);
     setToken(accessToken);
+
+    // Then sync local data with the new account
+    if (Object.keys(localCompletionStatus).length > 0) {
+      try {
+        // Convert local completion status to API format and sync
+        Object.entries(localCompletionStatus).forEach(async ([key, value]) => {
+          const [subject, year, session, paper, timezone] = key.split('-');
+          await axios.post(
+            `${API_URL}/completion`,
+            {
+              subject_id: subject,
+              year: parseInt(year),
+              session: session,
+              paper: paper,
+              timezone: timezone || null,
+              is_completed: value.is_completed,
+              score: value.score
+            },
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
+        });
+      } catch (error) {
+        console.error('Error syncing local completion status:', error);
+      }
+    }
+
+    // Sync local subjects
+    if (localSubjects.length > 0) {
+      try {
+        await axios.post(
+          `${API_URL}/subjects`,
+          { subjects: localSubjects },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+      } catch (error) {
+        console.error('Error syncing local subjects:', error);
+      }
+    }
+
+    // Clear local storage after successful sync
+    setLocalCompletionStatus({});
+    setLocalSubjects([]);
+    localStorage.removeItem('localCompletionStatus');
+    localStorage.removeItem('localSubjects');
+
     return response;
   };
 
@@ -69,7 +131,11 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    token
+    token,
+    localCompletionStatus,
+    setLocalCompletionStatus,
+    localSubjects,
+    setLocalSubjects
   };
 
   return (
