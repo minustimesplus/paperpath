@@ -241,6 +241,9 @@ class CompletionStatus(BaseModel):
     is_completed: bool
     score: Optional[int] = None
 
+class BulkCompletionStatus(BaseModel):
+    completion_data: Dict[str, Dict[str, Any]]
+
 # Helper functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -512,6 +515,66 @@ async def update_completion(status: CompletionStatus, current_user: UserInDB = D
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error updating completion status"
+        )
+
+@app.post("/completion/bulk")
+async def bulk_update_completion(data: BulkCompletionStatus, current_user: UserInDB = Depends(get_current_user)):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        for key, value in data.completion_data.items():
+            # Parse the composite key
+            subject_id, year, session, paper, *timezone_part = key.split('-')
+            timezone = timezone_part[0] if timezone_part else None
+            
+            # Check if this specific paper status already exists
+            query = """
+                SELECT id FROM completion_status 
+                WHERE user_id = %s AND subject_id = %s AND year = %s 
+                AND session = %s AND paper = %s
+            """
+            params = [current_user.id, subject_id, int(year), session, paper]
+            
+            if timezone:
+                query += " AND timezone = %s"
+                params.append(timezone)
+            else:
+                query += " AND (timezone IS NULL OR timezone = '')"
+                
+            cursor.execute(query, params)
+            existing = cursor.fetchone()
+            
+            if existing:
+                cursor.execute(
+                    """
+                    UPDATE completion_status 
+                    SET is_completed = %s, score = %s, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = %s
+                    """,
+                    (value['is_completed'], value.get('score'), existing[0])
+                )
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO completion_status 
+                    (user_id, subject_id, year, session, paper, timezone, is_completed, score) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (current_user.id, subject_id, int(year), session, paper, 
+                     timezone, value['is_completed'], value.get('score'))
+                )
+        
+        cursor.close()
+        conn.close()
+        
+        return {"status": "success", "message": "Bulk completion status updated"}
+    except Exception as e:
+        print(f"[ERROR] Error updating bulk completion status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating bulk completion status"
         )
 
 @app.get("/completion")

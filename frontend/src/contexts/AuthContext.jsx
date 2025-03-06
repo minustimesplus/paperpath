@@ -63,61 +63,62 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (username, email, password) => {
-    // First register the user
-    const response = await axios.post(`${API_URL}/register`, {
-      username,
-      email,
-      password
-    });
-    const accessToken = response.data.access_token;
-    localStorage.setItem('token', accessToken);
-    setToken(accessToken);
+    try {
+      // First register the user
+      const response = await axios.post(`${API_URL}/register`, {
+        username,
+        email,
+        password
+      });
+      const accessToken = response.data.access_token;
+      localStorage.setItem('token', accessToken);
+      setToken(accessToken);
 
-    // Then sync local data with the new account
-    if (Object.keys(localCompletionStatus).length > 0) {
-      try {
-        // Convert local completion status to API format and sync
-        Object.entries(localCompletionStatus).forEach(async ([key, value]) => {
-          const [subject, year, session, paper, timezone] = key.split('-');
-          await axios.post(
-            `${API_URL}/completion`,
-            {
-              subject_id: subject,
-              year: parseInt(year),
-              session: session,
-              paper: paper,
-              timezone: timezone || null,
-              is_completed: value.is_completed,
-              score: value.score
-            },
+      // Then sync local data with the new account
+      const syncPromises = [];
+
+      if (Object.keys(localCompletionStatus).length > 0) {
+        // Use the new bulk completion endpoint
+        syncPromises.push(
+          axios.post(
+            `${API_URL}/completion/bulk`,
+            { completion_data: localCompletionStatus },
             { headers: { Authorization: `Bearer ${accessToken}` } }
-          );
-        });
-      } catch (error) {
-        console.error('Error syncing local completion status:', error);
-      }
-    }
-
-    // Sync local subjects
-    if (localSubjects.length > 0) {
-      try {
-        await axios.post(
-          `${API_URL}/subjects`,
-          { subjects: localSubjects },
-          { headers: { Authorization: `Bearer ${accessToken}` } }
+          )
         );
-      } catch (error) {
-        console.error('Error syncing local subjects:', error);
       }
+
+      if (localSubjects.length > 0) {
+        syncPromises.push(
+          axios.post(
+            `${API_URL}/subjects`,
+            { subjects: localSubjects },
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          )
+        );
+      }
+
+      // Wait for all sync operations to complete
+      if (syncPromises.length > 0) {
+        try {
+          await Promise.all(syncPromises);
+        } catch (error) {
+          console.error('Error syncing local data:', error);
+          // Even if sync fails, we continue since the user is registered
+        }
+      }
+
+      // Clear local storage after successful sync
+      setLocalCompletionStatus({});
+      setLocalSubjects([]);
+      localStorage.removeItem('localCompletionStatus');
+      localStorage.removeItem('localSubjects');
+
+      return response;
+    } catch (error) {
+      // If registration fails, don't clear local data
+      throw error;
     }
-
-    // Clear local storage after successful sync
-    setLocalCompletionStatus({});
-    setLocalSubjects([]);
-    localStorage.removeItem('localCompletionStatus');
-    localStorage.removeItem('localSubjects');
-
-    return response;
   };
 
   const logout = () => {
