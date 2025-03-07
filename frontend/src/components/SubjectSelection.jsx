@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { getSubjectName, groupedSubjects } from '../config/subjectConfig';
 
-const API_URL = 'https://papertrackerforib.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const SubjectSelection = ({ onSubjectsChange }) => {
   const { token, currentUser, localSubjects, setLocalSubjects } = useAuth();
