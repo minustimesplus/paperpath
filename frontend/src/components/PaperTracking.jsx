@@ -4,7 +4,7 @@ import { useTimezoneConfig } from '../contexts/TimezoneContext';
 import { getSubjectName } from '../config/subjectConfig';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://papertrackerforib.onrender.com';
 
 const years = [2019, 2020, 2021, 2022, 2023, 2024];
 const sessions = ['May', 'November'];
@@ -258,9 +258,6 @@ const PaperTracking = () => {
   };
 
   const handleScoreCancel = () => {
-    // Still update paper status as completed but with null score when user clicks "Skip"
-    const { subject, year, session, paper, timezone } = scoreDialog.paperInfo;
-    updatePaperStatus(subject, year, session, paper, timezone, false, null);
     setScoreDialog({ isOpen: false, paperInfo: null, tempScore: '' });
   };
 

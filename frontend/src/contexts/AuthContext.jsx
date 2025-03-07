@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://papertrackerforib.onrender.com';
 
 const AuthContext = createContext();
 
@@ -51,15 +51,11 @@ export const AuthProvider = ({ children }) => {
   }, [localSubjects]);
 
   const login = async (username, password) => {
-    const formData = new URLSearchParams();
+    const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await axios.post(`${API_URL}/token`, formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
+    const response = await axios.post(`${API_URL}/token`, formData);
     const accessToken = response.data.access_token;
     localStorage.setItem('token', accessToken);
     setToken(accessToken);

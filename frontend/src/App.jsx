@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { TimezoneConfigProvider } from './contexts/TimezoneContext';
 import Login from './pages/Login';
@@ -15,6 +15,8 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            {/* Add a redirect from /dashboard to the main page */}
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </TimezoneConfigProvider>
