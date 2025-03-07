@@ -21,18 +21,18 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
           <div className="flex items-center">
-            <img src={logo} alt="IB Paper Tracker Logo" className="h-25 w-32 mr-3" />
+            <img src={logo} alt="IB Paper Tracker Logo" className="h-8 w-auto mr-3" />
           </div>
           <div className="flex items-center space-x-4">
             {currentUser ? (
               <>
-                <span className="text-gray-700">Hello, {currentUser.username}</span>
+                <span className="text-gray-700 text-sm">Hello, {currentUser.username}</span>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
+                  className="bg-red-500 hover:bg-red-700 text-white text-sm py-1 px-3 rounded"
                 >
                   Logout
                 </button>
@@ -41,13 +41,13 @@ const Dashboard = () => {
               <div className="space-x-4">
                 <Link
                   to="/login"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  className="bg-blue-500 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded"
                 >
                   Register
                 </Link>
