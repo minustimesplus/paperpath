@@ -28,6 +28,10 @@ const PaperTracking = () => {
   const [error, setError] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
   const [scoreDialog, setScoreDialog] = useState({ isOpen: false, paperInfo: null, tempScore: '' });
+  const [showTZBanner, setShowTZBanner] = useState(() => {
+    const saved = localStorage.getItem('tzBannerDismissed') === 'true';
+    return !saved;
+  });
 
   // Toggle row expansion
   const toggleRowExpansion = (rowKey) => {
@@ -209,6 +213,12 @@ const PaperTracking = () => {
   
   const stats = calculateStats();
 
+  // Handle banner dismissal
+  const handleTZBannerDismiss = () => {
+    setShowTZBanner(false);
+    localStorage.setItem('tzBannerDismissed', 'true');
+  };
+
   if (loading || tzLoading) {
     return <div className="text-center py-4">Loading your papers...</div>;
   }
@@ -302,16 +312,31 @@ const PaperTracking = () => {
             </p>
           </div>
           
-          {subjectHasAnyTZVariants && (
-            <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-              <p className="text-sm text-yellow-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                Some papers for this subject have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg> icon to see and track these variants.
-              </p>
+          {subjectHasAnyTZVariants && showTZBanner && (
+            <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="p-3 flex justify-between items-start">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-sm text-yellow-800">
+                    Some papers for this subject have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg> icon to see and track these variants.
+                  </p>
+                </div>
+                <button
+                  onClick={handleTZBannerDismiss}
+                  className="flex-shrink-0 ml-4 bg-transparent rounded-md p-0.5 inline-flex text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
           

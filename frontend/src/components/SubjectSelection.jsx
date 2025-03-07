@@ -8,13 +8,11 @@ const API_URL = 'https://papertrackerforib.onrender.com';
 const SubjectSelection = ({ onSubjectsChange }) => {
   const { token, currentUser, localSubjects, setLocalSubjects } = useAuth();
   const [subjects, setSubjects] = useState([]);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
-      // Fetch user's subjects from server if logged in
       axios.get(`${API_URL}/subjects`, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -25,7 +23,6 @@ const SubjectSelection = ({ onSubjectsChange }) => {
           console.error('Error fetching subjects:', err);
         });
     } else {
-      // Use local subjects for anonymous users
       setSubjects(localSubjects);
     }
   }, [token, currentUser, localSubjects]);
@@ -36,15 +33,12 @@ const SubjectSelection = ({ onSubjectsChange }) => {
       : [...subjects, subjectId];
     
     if (currentUser) {
-      // Save to API if logged in
       axios.post(`${API_URL}/subjects`, { subjects: newSubjects }, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(() => {
           setSubjects(newSubjects);
-          setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
           setError('');
-          setTimeout(() => setMessage(''), 3000);
           if (onSubjectsChange) onSubjectsChange();
         })
         .catch(err => {
@@ -52,12 +46,8 @@ const SubjectSelection = ({ onSubjectsChange }) => {
           setError('Failed to update subjects');
         });
     } else {
-      // Save to local storage if anonymous
       setLocalSubjects(newSubjects);
       setSubjects(newSubjects);
-      setMessage(subjects.includes(subjectId) ? 'Subject removed successfully' : 'Subject added successfully');
-      setError('');
-      setTimeout(() => setMessage(''), 3000);
       if (onSubjectsChange) onSubjectsChange();
     }
   };
@@ -77,10 +67,8 @@ const SubjectSelection = ({ onSubjectsChange }) => {
         </button>
       </div>
       
-      {message && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{message}</div>}
       {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
       
-      {/* Selected subjects display */}
       <div className="mb-4">
         <h3 className="text-lg font-medium mb-2">Selected Subjects:</h3>
         {subjects.length > 0 ? (
@@ -96,7 +84,6 @@ const SubjectSelection = ({ onSubjectsChange }) => {
         )}
       </div>
       
-      {/* Subject selection dropdown */}
       {isDropdownOpen && (
         <div className="mt-6 border-t pt-4">
           <h3 className="text-lg font-medium mb-4">Select Your IB Subjects:</h3>

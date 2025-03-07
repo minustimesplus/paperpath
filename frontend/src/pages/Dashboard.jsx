@@ -71,7 +71,7 @@ const Dashboard = () => {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-blue-900">
-                      Your progress will only be saved locally. Create an account to save your progress securely!
+                      Your progress is currently only saved in this browser. Create an account to save your progress securely!
                     </p>
                   </div>
                 </div>
