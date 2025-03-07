@@ -3,6 +3,10 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+if (!API_URL) {
+  console.error('API_URL is not defined in environment variables');
+}
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -51,19 +55,39 @@ export const AuthProvider = ({ children }) => {
   }, [localSubjects]);
 
   const login = async (username, password) => {
-    const formData = new URLSearchParams();
-    formData.append('username', username);
-    formData.append('password', password);
-
-    const response = await axios.post(`${API_URL}/token`, formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    try {
+      if (!API_URL) {
+        throw new Error('API URL is not configured');
       }
-    });
-    const accessToken = response.data.access_token;
-    localStorage.setItem('token', accessToken);
-    setToken(accessToken);
-    return response;
+
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      console.log('Making login request to:', `${API_URL}/token`);
+      
+      const response = await axios.post(`${API_URL}/token`, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      if (!response.data || !response.data.access_token) {
+        throw new Error('Invalid response from server');
+      }
+
+      const accessToken = response.data.access_token;
+      localStorage.setItem('token', accessToken);
+      setToken(accessToken);
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
+      throw error;
+    }
   };
 
   const register = async (username, email, password) => {
