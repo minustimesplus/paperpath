@@ -9,15 +9,12 @@ A web application designed to help International Baccalaureate (IB) students tra
 - **Subject Management**: Add and manage your IB subjects
 - **Paper Tracking**: Track which past papers you've completed across years (2019-2024)
 - **Score Recording**: Record your scores for each completed paper
-- **Score Analysis**: Visualize your performance with charts and statistics
-
 
 ### How to Use
 
 1. Complete a past paper in the Paper Tracking tab
 2. Click "Add score" next to any completed paper
 3. Enter your score (0-100)
-4. View detailed analysis in the "Score Analysis" tab
 
 ## Technical Implementation
 
