@@ -52,7 +52,7 @@ const PaperTracking = () => {
         .then(([subjectsResponse, completionResponse]) => {
           setSubjects(subjectsResponse.data.subjects || []);
           setCompletionStatus(completionResponse.data || {});
-          if (subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
+          if (!selectedSubject && subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
             setSelectedSubject(subjectsResponse.data.subjects[0]);
           }
         })
@@ -67,12 +67,12 @@ const PaperTracking = () => {
       // Use local storage for anonymous users
       setSubjects(localSubjects);
       setCompletionStatus(localCompletionStatus);
-      if (localSubjects.length > 0) {
+      if (!selectedSubject && localSubjects.length > 0) {
         setSelectedSubject(localSubjects[0]);
       }
       setLoading(false);
     }
-  }, [token, currentUser, localSubjects, localCompletionStatus]);
+  }, [token, currentUser, localSubjects, localCompletionStatus, selectedSubject]);
 
   const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted, score = null) => {
     const statusKey = timezone 
