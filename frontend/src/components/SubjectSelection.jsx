@@ -53,9 +53,9 @@ const SubjectSelection = ({ onSubjectsChange }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">My Subjects</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">My Subjects</h2>
         <button 
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
@@ -67,30 +67,30 @@ const SubjectSelection = ({ onSubjectsChange }) => {
         </button>
       </div>
       
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+      {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
       <div className="mb-4">
-        <h3 className="text-lg font-medium mb-2">Selected Subjects:</h3>
+        <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Subjects:</h3>
         {subjects.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {subjects.map(subject => (
-              <span key={subject} className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">
+              <span key={subject} className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded">
                 {getSubjectName(subject)}
               </span>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 italic">No subjects selected yet. Edit subjects to get started.</p>
+          <p className="text-gray-500 dark:text-gray-400 italic">No subjects selected yet. Edit subjects to get started.</p>
         )}
       </div>
       
       {isDropdownOpen && (
-        <div className="mt-6 border-t pt-4">
-          <h3 className="text-lg font-medium mb-4">Select Your IB Subjects:</h3>
+        <div className="mt-6 border-t dark:border-gray-700 pt-4">
+          <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Select Your IB Subjects:</h3>
           
           {Object.entries(groupedSubjects).map(([category, subjectList]) => (
             <div key={category} className="mb-6">
-              <h4 className="text-md font-medium text-gray-700 mb-2">{category}</h4>
+              <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">{category}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {subjectList.map(subject => (
                   <div key={subject.id} className="flex items-center">
@@ -99,9 +99,9 @@ const SubjectSelection = ({ onSubjectsChange }) => {
                       id={subject.id}
                       checked={subjects.includes(subject.id)}
                       onChange={() => toggleSubject(subject.id)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                     />
-                    <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700">
+                    <label htmlFor={subject.id} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                       {subject.name}
                     </label>
                   </div>

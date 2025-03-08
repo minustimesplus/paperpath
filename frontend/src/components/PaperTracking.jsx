@@ -230,14 +230,14 @@ const PaperTracking = () => {
   };
 
   if (loading || tzLoading) {
-    return <div className="text-center py-4">Loading your papers...</div>;
+    return <div className="text-center py-4 text-gray-700 dark:text-gray-300">Loading your papers...</div>;
   }
 
   if (subjects.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
-        <p className="text-gray-500">Please add subjects first to start tracking papers.</p>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Paper Tracking</h2>
+        <p className="text-gray-500 dark:text-gray-400">Please add subjects first to start tracking papers.</p>
       </div>
     );
   }
@@ -286,17 +286,17 @@ const PaperTracking = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Paper Tracking</h2>
       
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+      {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
+        <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
           Select Subject to View
         </label>
         <select
-          className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
           value={selectedSubject}
           onChange={handleSubjectChange}
         >
@@ -313,32 +313,32 @@ const PaperTracking = () => {
           {/* Add the YearRangeSelector component */}
           <YearRangeSelector subjectId={selectedSubject} />
 
-          <div className="mb-6 bg-blue-50 p-4 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Completion Status</h3>
+          <div className="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+            <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Completion Status</h3>
             <div className="flex items-center">
-              <div className="w-full bg-gray-200 rounded-full h-4 mr-4">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mr-4">
                 <div 
                   className="bg-blue-600 h-4 rounded-full" 
                   style={{ width: `${stats.percentage}%` }}
                 ></div>
               </div>
-              <span className="text-sm font-medium">{stats.percentage}%</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{stats.percentage}%</span>
             </div>
-            <p className="text-sm mt-2">
+            <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">
               {stats.completed} of {stats.total} papers completed
             </p>
           </div>
           
           {subjectHasAnyTZVariants && showTZBanner && (
-            <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="mb-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="p-3 flex justify-between items-start">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-5 w-5 text-yellow-600 dark:text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <p className="ml-3 text-sm text-yellow-800">
+                  <p className="ml-3 text-sm text-yellow-800 dark:text-yellow-300">
                     Some papers for this subject have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg> icon to see and track these variants.
@@ -346,7 +346,7 @@ const PaperTracking = () => {
                 </div>
                 <button
                   onClick={handleTZBannerDismiss}
-                  className="flex-shrink-0 ml-4 bg-transparent rounded-md p-0.5 inline-flex text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                  className="flex-shrink-0 ml-4 bg-transparent rounded-md p-0.5 inline-flex text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-800 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                 >
                   <span className="sr-only">Dismiss</span>
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -358,20 +358,20 @@ const PaperTracking = () => {
           )}
           
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="w-10"></th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Session</th>
                   {availablePapers.map(paper => (
-                    <th key={paper} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th key={paper} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       {paper}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {years.map(year => 
                   sessions.map((session, sessionIndex) => {
                     const rowKey = `${year}-${session}`;
@@ -381,12 +381,12 @@ const PaperTracking = () => {
                     
                     return (
                       <React.Fragment key={rowKey}>
-                        <tr className={sessionIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                        <tr className={sessionIndex % 2 === 0 ? 'bg-gray-50 dark:bg-gray-700' : 'bg-white dark:bg-gray-800'}>
                           <td className="pl-4 py-4">
                             {rowHasTZVariants && (
                               <button 
                                 onClick={() => toggleRowExpansion(rowKey)}
-                                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                 aria-label={isExpanded ? "Collapse row" : "Expand row"}
                               >
                                 <svg 
@@ -400,8 +400,8 @@ const PaperTracking = () => {
                               </button>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{year}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{year}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session}</td>
                           
                           {availablePapers.map(paper => {
                             const paperHasTZ = tzConfig[selectedSubject]?.[paper.toLowerCase().replace(' ', '')];
@@ -411,15 +411,15 @@ const PaperTracking = () => {
                               return (
                                 <td key={`${rowKey}-${paper}`} className="px-6 py-4 whitespace-nowrap">
                                   {status === 'completed' ? (
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200">
                                       All Complete
                                     </span>
                                   ) : status === 'partial' ? (
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">
                                       Partially Complete
                                     </span>
                                   ) : (
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                       Incomplete
                                     </span>
                                   )}
@@ -432,7 +432,7 @@ const PaperTracking = () => {
                                     <label className="inline-flex items-center">
                                       <input
                                         type="checkbox"
-                                        className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                        className="form-checkbox h-5 w-5 text-blue-600 dark:text-blue-400 rounded dark:bg-gray-700 dark:border-gray-600"
                                         checked={getPaperStatus(selectedSubject, year, session, paper)}
                                         onChange={() => handleCheckboxChange(
                                           selectedSubject,
@@ -443,10 +443,10 @@ const PaperTracking = () => {
                                           getPaperStatus(selectedSubject, year, session, paper)
                                         )}
                                       />
-                                      <span className="ml-2 text-sm text-gray-700">Completed</span>
+                                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Completed</span>
                                     </label>
                                     {getPaperStatus(selectedSubject, year, session, paper) && getPaperScore(selectedSubject, year, session, paper) !== null && (
-                                      <span className="text-sm text-gray-600">
+                                      <span className="text-sm text-gray-600 dark:text-gray-400">
                                         Score: {getPaperScore(selectedSubject, year, session, paper)}%
                                       </span>
                                     )}
@@ -458,9 +458,9 @@ const PaperTracking = () => {
                         </tr>
                         
                         {isExpanded && rowHasTZVariants && (
-                          <tr className={sessionIndex % 2 === 0 ? 'bg-gray-100' : 'bg-gray-50'}>
+                          <tr className={sessionIndex % 2 === 0 ? 'bg-gray-100 dark:bg-gray-600' : 'bg-gray-50 dark:bg-gray-700'}>
                             <td></td>
-                            <td colSpan="2" className="px-6 py-3 text-sm text-gray-500 text-right">
+                            <td colSpan="2" className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 text-right">
                               <span className="font-medium">Timezone Variants:</span>
                             </td>
                             
@@ -476,7 +476,7 @@ const PaperTracking = () => {
                                           <label className="inline-flex items-center">
                                             <input
                                               type="checkbox"
-                                              className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                              className="form-checkbox h-5 w-5 text-blue-600 dark:text-blue-400 rounded dark:bg-gray-700 dark:border-gray-600"
                                               checked={getPaperStatus(selectedSubject, year, session, paper, timezone)}
                                               onChange={() => handleCheckboxChange(
                                                 selectedSubject,
@@ -487,11 +487,11 @@ const PaperTracking = () => {
                                                 getPaperStatus(selectedSubject, year, session, paper, timezone)
                                               )}
                                             />
-                                            <span className="ml-2 text-sm text-gray-700">{timezone}</span>
+                                            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{timezone}</span>
                                           </label>
                                           {getPaperStatus(selectedSubject, year, session, paper, timezone) && 
                                            getPaperScore(selectedSubject, year, session, paper, timezone) !== null && (
-                                            <span className="text-sm text-gray-600">
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
                                               Score: {getPaperScore(selectedSubject, year, session, paper, timezone)}%
                                             </span>
                                           )}
@@ -501,7 +501,7 @@ const PaperTracking = () => {
                                   </td>
                                 );
                               } else {
-                                return <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3 text-sm text-gray-400 italic">N/A</td>;
+                                return <td key={`${rowKey}-${paper}-tz`} className="px-6 py-3 text-sm text-gray-400 dark:text-gray-500 italic">N/A</td>;
                               }
                             })}
                           </tr>
@@ -518,12 +518,12 @@ const PaperTracking = () => {
       
       {/* Score Dialog */}
       {scoreDialog.isOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
             <div className="mt-3 text-center">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Enter Score</h3>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Enter Score</h3>
               <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   {scoreDialog.paperInfo.paper} - {scoreDialog.paperInfo.session} {scoreDialog.paperInfo.year}
                   {scoreDialog.paperInfo.timezone ? ` (${scoreDialog.paperInfo.timezone})` : ''}
                 </p>
@@ -532,7 +532,7 @@ const PaperTracking = () => {
                   min="0"
                   max="100"
                   value={scoreDialog.paperInfo.tempScore}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                   placeholder="Score (0-100)"
                   onChange={handleScoreChange}
                 />

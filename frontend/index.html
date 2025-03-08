@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,15 @@
     <link rel="icon" href="/src/logo.svg" type="image/svg+xml">
     <!-- Include Tailwind CSS from CDN with SRI hash for security -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configure Tailwind dark mode
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
