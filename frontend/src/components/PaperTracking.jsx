@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTimezoneConfig } from '../contexts/TimezoneContext';
 import { getSubjectName } from '../config/subjectConfig';
+import YearRangeSelector from './YearRangeSelector';
 import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
 
-const years = [2019, 2020, 2021, 2022, 2023, 2024];
+// Default years array is now defined but will be filtered by the selected range
+const ALL_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
 const sessions = ['May', 'November'];
 const timezones = ['TZ1', 'TZ2'];
 
@@ -20,7 +22,7 @@ const availableSubjects = [
 
 const PaperTracking = () => {
   const { token, currentUser, localCompletionStatus, setLocalCompletionStatus, localSubjects } = useAuth();
-  const { tzConfig, loading: tzLoading } = useTimezoneConfig();
+  const { tzConfig, loading: tzLoading, getYearRange } = useTimezoneConfig();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -32,6 +34,14 @@ const PaperTracking = () => {
     const saved = localStorage.getItem('tzBannerDismissed') === 'true';
     return !saved;
   });
+
+  // Get filtered years based on selected subject's year range
+  const years = useMemo(() => {
+    if (!selectedSubject) return ALL_YEARS;
+    
+    const { startYear, endYear } = getYearRange(selectedSubject);
+    return ALL_YEARS.filter(year => year >= startYear && year <= endYear);
+  }, [selectedSubject, getYearRange]);
 
   // Toggle row expansion
   const toggleRowExpansion = (rowKey) => {
@@ -271,20 +281,24 @@ const PaperTracking = () => {
     setScoreDialog({ isOpen: false, paperInfo: null, tempScore: '' });
   };
 
+  const handleSubjectChange = (e) => {
+    setSelectedSubject(e.target.value);
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4">Paper Tracking</h2>
       
       {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
       
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
           Select Subject to View
         </label>
         <select
           className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
+          onChange={handleSubjectChange}
         >
           {subjects.map(subject => (
             <option key={subject} value={subject}>
@@ -296,6 +310,9 @@ const PaperTracking = () => {
       
       {selectedSubject && (
         <>
+          {/* Add the YearRangeSelector component */}
+          <YearRangeSelector subjectId={selectedSubject} />
+
           <div className="mb-6 bg-blue-50 p-4 rounded-lg">
             <h3 className="text-lg font-medium mb-2">Completion Status</h3>
             <div className="flex items-center">
