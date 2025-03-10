@@ -278,6 +278,9 @@ const PaperTracking = () => {
   };
 
   const handleScoreCancel = () => {
+    // Fix: Update the paper status as completed with null score when skipping
+    const { subject, year, session, paper, timezone } = scoreDialog.paperInfo;
+    updatePaperStatus(subject, year, session, paper, timezone, false, null);
     setScoreDialog({ isOpen: false, paperInfo: null, tempScore: '' });
   };
 
