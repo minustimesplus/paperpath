@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import jwt
@@ -13,6 +13,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # test
 
@@ -33,6 +36,13 @@ app.add_middleware(
 
 # Database connection string from .env
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Email configuration
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USERNAME = os.getenv("EMAIL_USERNAME", "")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
+EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT", "")
 
 # SQLAlchemy setup
 engine = create_engine(DATABASE_URL)
@@ -243,6 +253,12 @@ class CompletionStatus(BaseModel):
 
 class BulkCompletionStatus(BaseModel):
     completion_data: Dict[str, Dict[str, Any]]
+
+class FeedbackModel(BaseModel):
+    message: str
+    email: Optional[str] = None
+    timestamp: Optional[str] = None
+    user: Optional[str] = None
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
@@ -645,6 +661,73 @@ async def get_completion(current_user: Optional[UserInDB] = Depends(get_current_
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving completion data"
+        )
+
+@app.post("/feedback")
+async def submit_feedback(feedback: FeedbackModel):
+    try:
+        # Create email message
+        msg = MIMEMultipart()
+        msg["From"] = EMAIL_USERNAME
+        msg["To"] = EMAIL_RECIPIENT
+        msg["Subject"] = "IB Paper Tracker Feedback"
+        
+        # Format the email body
+        email_body = f"""
+        New Feedback from IB Paper Tracker:
+        
+        From: {feedback.user if feedback.user else feedback.email if feedback.email else 'Anonymous'}
+        Time: {feedback.timestamp if feedback.timestamp else datetime.now().isoformat()}
+        
+        Message:
+        {feedback.message}
+        """
+        
+        msg.attach(MIMEText(email_body, "plain"))
+        
+        # Save feedback to database if needed
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        # Create feedback table if it doesn't exist
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_feedback (
+            id SERIAL PRIMARY KEY,
+            message TEXT NOT NULL,
+            email TEXT,
+            user_identifier TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
+        
+        # Save the feedback
+        cursor.execute(
+            "INSERT INTO user_feedback (message, email, user_identifier, timestamp) VALUES (%s, %s, %s, %s)",
+            (feedback.message, feedback.email, feedback.user, 
+             datetime.now() if not feedback.timestamp else datetime.fromisoformat(feedback.timestamp.replace('Z', '+00:00')))
+        )
+        
+        cursor.close()
+        conn.close()
+        
+        # Send email if configured
+        if EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_RECIPIENT:
+            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+            server.starttls()
+            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            print(f"Feedback email sent to {EMAIL_RECIPIENT}")
+        else:
+            print("Email sending skipped - email configuration not provided")
+        
+        return {"status": "success", "message": "Feedback received"}
+    except Exception as e:
+        print(f"Error processing feedback: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error processing feedback"
         )
 
 # Run the application
