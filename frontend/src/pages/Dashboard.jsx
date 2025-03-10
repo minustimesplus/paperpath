@@ -28,8 +28,7 @@ const Dashboard = () => {
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
           <div className="flex items-center">
-            {/* Only show logo in light mode */}
-            {!isDarkMode && <img src={logo} alt="IB Paper Tracker Logo" className="h-8 w-auto mr-3" />}
+            {/* Logo removed in both light and dark mode */}
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">IB Paper Tracker</h1>
           </div>
           <div className="flex items-center space-x-4">
