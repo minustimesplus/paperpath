@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTimezoneConfig } from '../contexts/TimezoneContext';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const TimezoneToggle = ({ subjectId }) => {
   const { 
@@ -9,7 +10,28 @@ const TimezoneToggle = ({ subjectId }) => {
   } = useTimezoneConfig();
   
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [showPopup, setShowPopup] = useLocalStorage('showTimezonePopup', true);
+
+  useEffect(() => {
+    if (showPopup) {
+      // Show the popup when the component mounts
+      setIsOpen(true);
+    }
+  }, [showPopup]);
+
+  const handleToggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleToggleChange = (paperKey, enabled) => {
+    updateUserTimezoneOverride(subjectId, paperKey, enabled);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setIsOpen(false);
+  };
+
   // Get papers for the selected subject
   const papers = subjectId && tzConfig[subjectId] 
     ? Object.keys(tzConfig[subjectId])
@@ -24,14 +46,6 @@ const TimezoneToggle = ({ subjectId }) => {
             : (tzConfig[subjectId][key] || false)
         }))
     : [];
-
-  const handleToggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleToggleChange = (paperKey, enabled) => {
-    updateUserTimezoneOverride(subjectId, paperKey, enabled);
-  };
 
   return (
     <div className="relative">
@@ -53,7 +67,7 @@ const TimezoneToggle = ({ subjectId }) => {
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        Timezone Settings {isOpen ? '▲' : '▼'}
+        Timezone Settings {isOpen ? '\u25b2' : '\u25bc'}
       </button>
 
       {isOpen && (
@@ -89,6 +103,19 @@ const TimezoneToggle = ({ subjectId }) => {
               ))}
             </div>
           </div>
+          {showPopup && (
+            <div className="absolute top-0 right-0 mt-2 mr-2 p-2 bg-blue-100 border border-blue-300 rounded-md shadow-md">
+              <p className="text-sm text-blue-700">
+                You can configure timezone settings for each paper here.
+              </p>
+              <button
+                onClick={handleClosePopup}
+                className="absolute top-0 right-0 mt-1 mr-1 text-blue-500 hover:text-blue-700 focus:outline-none"
+              >
+                &times;
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
