@@ -360,8 +360,15 @@ const PaperTracking = () => {
       
       {selectedSubject && (
         <>
-          {/* Add the YearRangeSelector component */}
-          <YearRangeSelector subjectId={selectedSubject} />
+          {/* Year Range and Timezone Settings in same row */}
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <div className="flex-grow">
+              <YearRangeSelector subjectId={selectedSubject} />
+            </div>
+            <div>
+              <TimezoneToggle subjectId={selectedSubject} />
+            </div>
+          </div>
 
           <div className="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
             <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Completion Status</h3>
@@ -377,30 +384,6 @@ const PaperTracking = () => {
             <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">
               {stats.completed} of {stats.total} papers completed
             </p>
-          </div>
-          
-          {/* Timezone Settings Info */}
-          <div className="mb-4 bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
-            <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Timezone Settings</h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-              Some papers have different versions for different timezones (TZ1/TZ2). 
-              Use the toggle switches below to enable or disable timezone tracking for each paper.
-            </p>
-            <div className="flex flex-wrap gap-4 mt-3">
-              {availablePapers.map(paper => {
-                const paperKey = paper.toLowerCase().replace(' ', '');
-                const hasDefaultTimezone = tzConfig[selectedSubject]?.[paperKey] || false;
-                return (
-                  <div key={`tz-info-${paper}`} className="flex items-center">
-                    <span className="text-sm font-medium mr-2 text-gray-700 dark:text-gray-300">{paper}:</span>
-                    <TimezoneToggle subjectId={selectedSubject} paper={paper} />
-                    {hasDefaultTimezone && (
-                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(Default: Enabled)</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </div>
           
           {subjectHasAnyTZVariants && showTZBanner && (
@@ -440,10 +423,7 @@ const PaperTracking = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Session</th>
                   {availablePapers.map(paper => (
                     <th key={paper} className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      <div className="flex flex-col items-center space-y-2">
-                        <span>{paper}</span>
-                        <TimezoneToggle subjectId={selectedSubject} paper={paper} />
-                      </div>
+                      {paper}
                     </th>
                   ))}
                 </tr>
