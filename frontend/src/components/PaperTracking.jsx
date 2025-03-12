@@ -21,6 +21,15 @@ const availableSubjects = [
   // ...rest of available subjects...
 ];
 
+// Helper function to check if a year-session combination is valid
+const isValidSession = (year, session) => {
+  // No exams in May 2020
+  if (year === 2020 && session === 'May') {
+    return false;
+  }
+  return true;
+};
+
 const PaperTracking = () => {
   const { token, currentUser, localCompletionStatus, setLocalCompletionStatus, localSubjects } = useAuth();
   const { tzConfig, loading: tzLoading, getYearRange, getEffectiveTimezoneSetting } = useTimezoneConfig();
@@ -437,6 +446,11 @@ const PaperTracking = () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {years.map(year => 
                   sessions.map((session, sessionIndex) => {
+                    // Skip rendering May 2020
+                    if (!isValidSession(year, session)) {
+                      return null;
+                    }
+                    
                     const rowKey = `${year}-${session}`;
                     const isExpanded = expandedRows[rowKey] || false;
                     const rowHasTZVariants = availablePapers

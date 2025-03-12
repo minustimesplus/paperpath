@@ -338,6 +338,12 @@ async def get_current_user_optional(token: str = Depends(oauth2_scheme)):
     except Exception:
         return None
 
+def is_valid_session(year: int, session: str) -> bool:
+    # No exams in May 2020
+    if year == 2020 and session == 'May':
+        return False
+    return True
+
 # Routes
 @app.post("/register", response_model=Token)
 async def register_user(user: User):
@@ -484,6 +490,13 @@ async def get_timezone_config():
 @app.post("/completion")
 async def update_completion(status: CompletionStatus, current_user: Optional[UserInDB] = Depends(get_current_user_optional)):
     try:
+        # Validate the session
+        if not is_valid_session(status.year, status.session):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid exam session"
+            )
+            
         print(f"[DEBUG] Updating completion status:")
         print(f"[DEBUG] Status data: {status}")
         
@@ -557,15 +570,24 @@ async def update_completion(status: CompletionStatus, current_user: Optional[Use
 async def bulk_update_completion(data: BulkCompletionStatus, current_user: Optional[UserInDB] = Depends(get_current_user_optional)):
     try:
         if current_user:
-            # Existing code for authenticated users
             conn = psycopg2.connect(DATABASE_URL)
             conn.autocommit = True
             cursor = conn.cursor()
             
+            # First, delete any May 2020 entries
+            cursor.execute("""
+                DELETE FROM completion_status 
+                WHERE user_id = %s AND year = 2020 AND session = 'May'
+            """, (current_user.id,))
+            
             for key, value in data.completion_data.items():
                 subject_id, year, session, paper, *timezone_part = key.split('-')
-                timezone = timezone_part[0] if timezone_part else None
+                year = int(year)
                 
+                # Skip invalid sessions
+                if not is_valid_session(year, session):
+                    continue
+                    
                 query = """
                     SELECT id FROM completion_status 
                     WHERE user_id = %s AND subject_id = %s AND year = %s 
