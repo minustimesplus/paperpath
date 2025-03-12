@@ -56,30 +56,37 @@ const SubjectSelection = ({ onSubjectsChange }) => {
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">My Subjects</h3>
-          <button 
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
-          >
-            {isDropdownOpen ? 'Hide' : 'Edit'} Subjects
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ml-1 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-        
+      <div>
         {subjects.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             {subjects.map(subject => (
               <span key={subject} className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded">
                 {getSubjectName(subject)}
               </span>
             ))}
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium px-3 py-1 rounded border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors flex items-center gap-1"
+            >
+              {isDropdownOpen ? 'Done' : 'Edit'}
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400 italic">No subjects selected yet. Edit subjects to get started.</p>
+          <div className="flex items-center gap-2">
+            <p className="text-gray-500 dark:text-gray-400">No subjects selected.</p>
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium px-3 py-1 rounded border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors flex items-center gap-1"
+            >
+              Add Subjects
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
         )}
       </div>
       
