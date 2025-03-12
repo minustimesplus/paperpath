@@ -9,7 +9,7 @@ import axios from 'axios';
 const API_URL = 'https://papertrackerforib.onrender.com';
 
 // Default years array is now defined but will be filtered by the selected range
-const ALL_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
+const ALL_YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
 const sessions = ['May', 'November'];
 const timezones = ['TZ1', 'TZ2'];
 

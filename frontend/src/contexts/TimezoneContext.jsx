@@ -9,12 +9,12 @@ export const useTimezoneConfig = () => {
 
 // Default year range for all subjects
 const DEFAULT_YEAR_RANGE = {
-  startYear: 2019,
+  startYear: 2014,
   endYear: 2024
 };
 
 // All possible years that can be selected
-export const AVAILABLE_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
+export const AVAILABLE_YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
 
 export const TimezoneConfigProvider = ({ children }) => {
   const [tzConfig, setTzConfig] = useState({});
