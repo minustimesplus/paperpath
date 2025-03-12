@@ -28,6 +28,8 @@ export const availableSubjects = [
   { id: 'psychology_hl', name: 'Psychology HL', group: 3 },
   { id: 'business_sl', name: 'Business Management SL', group: 3 },
   { id: 'business_hl', name: 'Business Management HL', group: 3 },
+  { id: 'philosophy_sl', name: 'Philosophy SL', group: 3 },
+  { id: 'philosophy_hl', name: 'Philosophy HL', group: 3 },
 
   // Group 4: Sciences
   { id: 'biology_sl', name: 'Biology SL', group: 4 },

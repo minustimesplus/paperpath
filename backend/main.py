@@ -56,7 +56,7 @@ IB_SUBJECT_GROUPS = {
         "English B", "French B", "Spanish B", "German B", "Mandarin B"
     ],
     "Group 3 - Individuals and Societies": [
-        "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)"
+        "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)", "Philosophy"
     ],
     "Group 4 - Sciences": [
         "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)"
