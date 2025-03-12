@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTimezoneConfig } from '../contexts/TimezoneContext';
 import { getSubjectName } from '../config/subjectConfig';
 import YearRangeSelector from './YearRangeSelector';
+import TimezoneToggle from './TimezoneToggle';
 import axios from 'axios';
 
 const API_URL = 'https://papertrackerforib.onrender.com';
@@ -22,7 +23,7 @@ const availableSubjects = [
 
 const PaperTracking = () => {
   const { token, currentUser, localCompletionStatus, setLocalCompletionStatus, localSubjects } = useAuth();
-  const { tzConfig, loading: tzLoading, getYearRange } = useTimezoneConfig();
+  const { tzConfig, loading: tzLoading, getYearRange, getEffectiveTimezoneSetting } = useTimezoneConfig();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -55,9 +56,11 @@ const PaperTracking = () => {
     }));
   };
   
-  // Check if selected subject has any papers with TZ variants
+  // Check if selected subject has any papers with TZ variants based on effective settings
   const subjectHasAnyTZVariants = selectedSubject ? 
-    Object.values(tzConfig[selectedSubject] || {}).some(hasTZ => hasTZ === true) : 
+    Object.keys(tzConfig[selectedSubject] || {})
+      .filter(key => key.startsWith('paper'))
+      .some(paperKey => getEffectiveTimezoneSetting(selectedSubject, paperKey)) : 
     false;
 
   useEffect(() => {
@@ -165,7 +168,8 @@ const PaperTracking = () => {
 
   // Calculate combined status for papers with TZ variants
   const getCombinedStatus = (subject, year, session, paper) => {
-    const hasTZ = tzConfig[subject]?.[paper.toLowerCase().replace(' ', '')];
+    const paperKey = paper.toLowerCase().replace(' ', '');
+    const hasTZ = getEffectiveTimezoneSetting(subject, paperKey);
     if (!hasTZ) {
       return getPaperStatus(subject, year, session, paper) ? 'completed' : 'incomplete';
     }
@@ -200,7 +204,9 @@ const PaperTracking = () => {
         if (papersList.length === 0) return;
         
         papersList.forEach(paper => {
-          const hasTZ = tzConfig[selectedSubject]?.[paper.toLowerCase().replace(' ', '')];
+          const paperKey = paper.toLowerCase().replace(' ', '');
+          const hasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
+          
           if (hasTZ) {
             timezones.forEach(timezone => {
               total++;
@@ -373,6 +379,30 @@ const PaperTracking = () => {
             </p>
           </div>
           
+          {/* Timezone Settings Info */}
+          <div className="mb-4 bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
+            <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Timezone Settings</h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+              Some papers have different versions for different timezones (TZ1/TZ2). 
+              Use the toggle switches below to enable or disable timezone tracking for each paper.
+            </p>
+            <div className="flex flex-wrap gap-4 mt-3">
+              {availablePapers.map(paper => {
+                const paperKey = paper.toLowerCase().replace(' ', '');
+                const hasDefaultTimezone = tzConfig[selectedSubject]?.[paperKey] || false;
+                return (
+                  <div key={`tz-info-${paper}`} className="flex items-center">
+                    <span className="text-sm font-medium mr-2 text-gray-700 dark:text-gray-300">{paper}:</span>
+                    <TimezoneToggle subjectId={selectedSubject} paper={paper} />
+                    {hasDefaultTimezone && (
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(Default: Enabled)</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
           {subjectHasAnyTZVariants && showTZBanner && (
             <div className="mb-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="p-3 flex justify-between items-start">
@@ -409,8 +439,11 @@ const PaperTracking = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Session</th>
                   {availablePapers.map(paper => (
-                    <th key={paper} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {paper}
+                    <th key={paper} className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <div className="flex flex-col items-center space-y-2">
+                        <span>{paper}</span>
+                        <TimezoneToggle subjectId={selectedSubject} paper={paper} />
+                      </div>
                     </th>
                   ))}
                 </tr>
@@ -421,7 +454,10 @@ const PaperTracking = () => {
                     const rowKey = `${year}-${session}`;
                     const isExpanded = expandedRows[rowKey] || false;
                     const rowHasTZVariants = availablePapers
-                      .some(paper => tzConfig[selectedSubject]?.[paper.toLowerCase().replace(' ', '')]);
+                      .some(paper => {
+                        const paperKey = paper.toLowerCase().replace(' ', '');
+                        return getEffectiveTimezoneSetting(selectedSubject, paperKey);
+                      });
                     
                     return (
                       <React.Fragment key={rowKey}>
@@ -448,7 +484,8 @@ const PaperTracking = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session}</td>
                           
                           {availablePapers.map(paper => {
-                            const paperHasTZ = tzConfig[selectedSubject]?.[paper.toLowerCase().replace(' ', '')];
+                            const paperKey = paper.toLowerCase().replace(' ', '');
+                            const paperHasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
                             const status = getCombinedStatus(selectedSubject, year, session, paper);
                             
                             if (paperHasTZ) {
@@ -509,7 +546,8 @@ const PaperTracking = () => {
                             </td>
                             
                             {availablePapers.map(paper => {
-                              const hasTZ = tzConfig[selectedSubject]?.[paper.toLowerCase().replace(' ', '')];
+                              const paperKey = paper.toLowerCase().replace(' ', '');
+                              const hasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
                               
                               if (hasTZ) {
                                 return (
