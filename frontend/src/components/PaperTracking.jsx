@@ -32,7 +32,7 @@ const isValidSession = (year, session) => {
 
 const PaperTracking = () => {
   const { token, currentUser, localCompletionStatus, setLocalCompletionStatus, localSubjects } = useAuth();
-  const { tzConfig, loading: tzLoading } = useTimezoneConfig();
+  const { tzConfig, loading: tzLoading, getYearRange, getEffectiveTimezoneSetting } = useTimezoneConfig();
   const [subjects, setSubjects] = useState([]);
   const [completionStatus, setCompletionStatus] = useState({});
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -78,21 +78,17 @@ const PaperTracking = () => {
     false;
 
   useEffect(() => {
-    setLoading(true);
     if (currentUser) {
-      // Fetch both subjects and completion data concurrently
+      // Fetch from server if logged in
       Promise.all([
         axios.get(`${API_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_URL}/completion`, { headers: { Authorization: `Bearer ${token}` } })
       ])
         .then(([subjectsResponse, completionResponse]) => {
-          const subjectsList = subjectsResponse.data.subjects || [];
-          setSubjects(subjectsList);
+          setSubjects(subjectsResponse.data.subjects || []);
           setCompletionStatus(completionResponse.data || {});
-          
-          // Only set initial subject after both data are loaded
-          if (!selectedSubject && subjectsList.length > 0) {
-            setSelectedSubject(subjectsList[0]);
+          if (!selectedSubject && subjectsResponse.data.subjects && subjectsResponse.data.subjects.length > 0) {
+            setSelectedSubject(subjectsResponse.data.subjects[0]);
           }
         })
         .catch(err => {
@@ -103,7 +99,7 @@ const PaperTracking = () => {
           setLoading(false);
         });
     } else {
-      // For anonymous users
+      // Use local storage for anonymous users
       setSubjects(localSubjects);
       setCompletionStatus(localCompletionStatus);
       if (!selectedSubject && localSubjects.length > 0) {
@@ -111,7 +107,7 @@ const PaperTracking = () => {
       }
       setLoading(false);
     }
-  }, [token, currentUser, localSubjects, localCompletionStatus]);
+  }, [token, currentUser, localSubjects, localCompletionStatus, selectedSubject]);
 
   const updatePaperStatus = (subject, year, session, paper, timezone, isCompleted, score = null) => {
     const statusKey = timezone 
