@@ -39,7 +39,7 @@ const YearRangeSelector = ({ subjectId }) => {
   };
 
   return (
-    <div className="mb-4">
+    <div className="relative">
       <button
         onClick={toggleOpen}
         className="flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 focus:outline-none"
@@ -62,7 +62,7 @@ const YearRangeSelector = ({ subjectId }) => {
       </button>
 
       {isOpen && (
-        <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+        <div className="absolute left-0 mt-2 p-3 w-64 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
@@ -75,7 +75,7 @@ const YearRangeSelector = ({ subjectId }) => {
                 id="startYear"
                 value={range.startYear}
                 onChange={handleStartYearChange}
-                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
+                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
               >
                 {AVAILABLE_YEARS.map((year) => (
                   <option key={`start-${year}`} value={year}>
@@ -95,7 +95,7 @@ const YearRangeSelector = ({ subjectId }) => {
                 id="endYear"
                 value={range.endYear}
                 onChange={handleEndYearChange}
-                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
+                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
               >
                 {AVAILABLE_YEARS.map((year) => (
                   <option key={`end-${year}`} value={year}>
