@@ -351,7 +351,23 @@ const PaperTracking = () => {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Paper Tracking</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Paper Tracking</h2>
+        
+        {/* Stats badge */}
+        {selectedSubject && (
+          <div className="flex items-center space-x-2">
+            <div className="bg-blue-50 dark:bg-blue-900 px-3 py-1 rounded-full">
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                {stats.completed}/{stats.total} completed
+              </span>
+              <span className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                {stats.percentage}%
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
       
       {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
@@ -375,31 +391,14 @@ const PaperTracking = () => {
       {selectedSubject && (
         <>
           {/* Year Range and Timezone Settings in same row */}
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <div className="flex-grow">
+          <div className="flex items-center gap-4 mb-4 text-sm border-b dark:border-gray-700 pb-4">
+            <div className="flex items-center gap-4">
               <YearRangeSelector subjectId={selectedSubject} />
-            </div>
-            <div>
+              <span className="text-gray-400">|</span>
               <TimezoneToggle subjectId={selectedSubject} />
             </div>
           </div>
 
-          <div className="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-            <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Completion Status</h3>
-            <div className="flex items-center">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mr-4">
-                <div 
-                  className="bg-blue-600 h-4 rounded-full" 
-                  style={{ width: `${stats.percentage}%` }}
-                ></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{stats.percentage}%</span>
-            </div>
-            <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">
-              {stats.completed} of {stats.total} papers completed
-            </p>
-          </div>
-          
           {subjectHasAnyTZVariants && showTZBanner && (
             <div className="mb-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="p-3 flex justify-between items-start">
