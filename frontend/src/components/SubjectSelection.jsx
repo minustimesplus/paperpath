@@ -54,23 +54,22 @@ const SubjectSelection = ({ onSubjectsChange }) => {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">My Subjects</h2>
-        <button 
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
-        >
-          {isDropdownOpen ? 'Hide' : 'Edit'} Subjects
-          <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ml-1 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </button>
-      </div>
-      
       {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
       <div className="mb-4">
-        <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Subjects:</h3>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">My Subjects</h3>
+          <button 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
+          >
+            {isDropdownOpen ? 'Hide' : 'Edit'} Subjects
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ml-1 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        
         {subjects.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {subjects.map(subject => (

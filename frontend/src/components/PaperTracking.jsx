@@ -351,24 +351,6 @@ const PaperTracking = () => {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Paper Tracking</h2>
-        
-        {/* Stats badge */}
-        {selectedSubject && (
-          <div className="flex items-center space-x-2">
-            <div className="bg-blue-50 dark:bg-blue-900 px-3 py-1 rounded-full">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {stats.completed}/{stats.total} completed
-              </span>
-              <span className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
-                {stats.percentage}%
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-      
       {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
       <div className="mb-4">
@@ -390,12 +372,23 @@ const PaperTracking = () => {
       
       {selectedSubject && (
         <>
-          {/* Year Range and Timezone Settings in same row */}
-          <div className="flex items-center gap-4 mb-4 text-sm border-b dark:border-gray-700 pb-4">
+          {/* Year Range, Timezone Settings, and Stats in same row */}
+          <div className="flex justify-between items-center mb-4 text-sm border-b dark:border-gray-700 pb-4">
             <div className="flex items-center gap-4">
               <YearRangeSelector subjectId={selectedSubject} />
               <span className="text-gray-400">|</span>
               <TimezoneToggle subjectId={selectedSubject} />
+            </div>
+            {/* Stats badge */}
+            <div className="flex items-center">
+              <div className="bg-blue-50 dark:bg-blue-900 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {stats.completed}/{stats.total} completed
+                </span>
+                <span className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                  {stats.percentage}%
+                </span>
+              </div>
             </div>
           </div>
 
