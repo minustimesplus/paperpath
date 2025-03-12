@@ -82,24 +82,26 @@ export const TimezoneConfigProvider = ({ children }) => {
   };
   
   useEffect(() => {
-    // Use local timezone configuration
-    setTzConfig(timezoneConfig);
+    // Make sure to initialize with an empty object if timezoneConfig is undefined
+    setTzConfig(timezoneConfig || {});
     setLoading(false);
   }, []);
   
+  const contextValue = {
+    tzConfig, 
+    loading,
+    yearRanges,
+    updateYearRange,
+    getYearRange,
+    DEFAULT_YEAR_RANGE,
+    AVAILABLE_YEARS,
+    userTimezoneOverrides,
+    updateUserTimezoneOverride,
+    getEffectiveTimezoneSetting
+  };
+
   return (
-    <TimezoneConfigContext.Provider value={{ 
-      tzConfig, 
-      loading,
-      yearRanges,
-      updateYearRange,
-      getYearRange,
-      DEFAULT_YEAR_RANGE,
-      AVAILABLE_YEARS,
-      userTimezoneOverrides,
-      updateUserTimezoneOverride,
-      getEffectiveTimezoneSetting
-    }}>
+    <TimezoneConfigContext.Provider value={contextValue}>
       {children}
     </TimezoneConfigContext.Provider>
   );

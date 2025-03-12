@@ -60,7 +60,12 @@ const PaperTracking = () => {
   const subjectHasAnyTZVariants = selectedSubject ? 
     Object.keys(tzConfig[selectedSubject] || {})
       .filter(key => key.startsWith('paper'))
-      .some(paperKey => getEffectiveTimezoneSetting(selectedSubject, paperKey)) : 
+      .some(paperKey => {
+        // Add null check to avoid errors if getEffectiveTimezoneSetting is undefined
+        return typeof getEffectiveTimezoneSetting === 'function' 
+          ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+          : (tzConfig[selectedSubject]?.[paperKey] || false);
+      }) : 
     false;
 
   useEffect(() => {
@@ -169,7 +174,12 @@ const PaperTracking = () => {
   // Calculate combined status for papers with TZ variants
   const getCombinedStatus = (subject, year, session, paper) => {
     const paperKey = paper.toLowerCase().replace(' ', '');
-    const hasTZ = getEffectiveTimezoneSetting(subject, paperKey);
+    
+    // Add null check for getEffectiveTimezoneSetting
+    const hasTZ = typeof getEffectiveTimezoneSetting === 'function'
+      ? getEffectiveTimezoneSetting(subject, paperKey)
+      : (tzConfig[subject]?.[paperKey] || false);
+      
     if (!hasTZ) {
       return getPaperStatus(subject, year, session, paper) ? 'completed' : 'incomplete';
     }
@@ -205,7 +215,11 @@ const PaperTracking = () => {
         
         papersList.forEach(paper => {
           const paperKey = paper.toLowerCase().replace(' ', '');
-          const hasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
+          
+          // Add null check for getEffectiveTimezoneSetting
+          const hasTZ = typeof getEffectiveTimezoneSetting === 'function'
+            ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+            : (tzConfig[selectedSubject]?.[paperKey] || false);
           
           if (hasTZ) {
             timezones.forEach(timezone => {
@@ -436,7 +450,9 @@ const PaperTracking = () => {
                     const rowHasTZVariants = availablePapers
                       .some(paper => {
                         const paperKey = paper.toLowerCase().replace(' ', '');
-                        return getEffectiveTimezoneSetting(selectedSubject, paperKey);
+                        return typeof getEffectiveTimezoneSetting === 'function'
+                          ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+                          : (tzConfig[selectedSubject]?.[paperKey] || false);
                       });
                     
                     return (
@@ -465,7 +481,9 @@ const PaperTracking = () => {
                           
                           {availablePapers.map(paper => {
                             const paperKey = paper.toLowerCase().replace(' ', '');
-                            const paperHasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
+                            const paperHasTZ = typeof getEffectiveTimezoneSetting === 'function'
+                              ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+                              : (tzConfig[selectedSubject]?.[paperKey] || false);
                             const status = getCombinedStatus(selectedSubject, year, session, paper);
                             
                             if (paperHasTZ) {
@@ -527,7 +545,9 @@ const PaperTracking = () => {
                             
                             {availablePapers.map(paper => {
                               const paperKey = paper.toLowerCase().replace(' ', '');
-                              const hasTZ = getEffectiveTimezoneSetting(selectedSubject, paperKey);
+                              const hasTZ = typeof getEffectiveTimezoneSetting === 'function'
+                                ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+                                : (tzConfig[selectedSubject]?.[paperKey] || false);
                               
                               if (hasTZ) {
                                 return (
