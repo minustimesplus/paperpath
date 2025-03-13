@@ -80,6 +80,14 @@
       "paper1": false,
       "paper2": true
     },
+    "italian_b_sl": {
+      "paper1": false,
+      "paper2": true
+    },
+    "italian_b_hl": {
+      "paper1": false,
+      "paper2": true
+    },
     "language_ab_initio_sl": {
       "paper1": false,
       "paper2": true
@@ -126,6 +134,15 @@
     "global_politics_hl": {
       "paper1": true,
       "paper2": true
+    },
+    "politics_sl": {
+      "paper1": true,
+      "paper2": true
+    },
+    "politics_hl": {
+      "paper1": true,
+      "paper2": true,
+      "paper3": false
     },
     "history_sl": {
       "paper1": true,
@@ -206,6 +223,15 @@
       "paper2": true
     },
     "design_tech_hl": {
+      "paper1": true,
+      "paper2": true,
+      "paper3": false
+    },
+    "design_technology_sl": {
+      "paper1": true,
+      "paper2": true
+    },
+    "design_technology_hl": {
       "paper1": true,
       "paper2": true,
       "paper3": false
