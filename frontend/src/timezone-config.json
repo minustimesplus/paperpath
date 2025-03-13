@@ -249,6 +249,11 @@
       "paper1": true,
       "paper2": true
     },
+    "ess_hl": {
+      "paper1": true,
+      "paper2": true,
+      "paper3": false
+    },
     "physics_sl": {
       "paper1": true,
       "paper2": true,

@@ -11,7 +11,7 @@
     "english_a_language_literature_sl": {
       "paper1": true,
       "paper2": false
-    },
+    }, 
     "english_a_language_literature_hl": {
       "paper1": true,
       "paper2": false,
@@ -248,6 +248,11 @@
     "ess_sl": {
       "paper1": true,
       "paper2": true
+    },
+    "ess_hl": {
+      "paper1": true,
+      "paper2": true,
+      "paper3": false
     },
     "physics_sl": {
       "paper1": true,
