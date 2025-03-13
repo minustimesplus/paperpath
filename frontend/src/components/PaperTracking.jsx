@@ -359,7 +359,7 @@ const PaperTracking = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
       {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">{error}</div>}
       
       <div className="mb-4">
@@ -381,11 +381,11 @@ const PaperTracking = () => {
       
       {selectedSubject && (
         <>
-          {/* Year Range, Timezone Settings, and Stats in same row */}
-          <div className="flex justify-between items-center mb-4 text-sm border-b dark:border-gray-700 pb-4">
-            <div className="flex items-center gap-4">
+          {/* Year Range, Timezone Settings, and Stats in responsive layout */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 text-sm border-b dark:border-gray-700 pb-4 gap-3">
+            <div className="flex flex-wrap items-center gap-4">
               <YearRangeSelector subjectId={selectedSubject} />
-              <span className="text-gray-400">|</span>
+              <span className="text-gray-400 hidden sm:inline">|</span>
               <TimezoneToggle subjectId={selectedSubject} />
             </div>
             {/* Stats badge */}
@@ -411,14 +411,14 @@ const PaperTracking = () => {
                     </svg>
                   </div>
                   <p className="ml-3 text-sm text-yellow-800 dark:text-yellow-300">
-                    Some papers for this subject have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
+                    Some papers have TZ1 and TZ2 variants. Click on the <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mx-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg> icon to see and track these variants.
+                    </svg> icon for these variants.
                   </p>
                 </div>
                 <button
                   onClick={handleTZBannerDismiss}
-                  className="flex-shrink-0 ml-4 bg-transparent rounded-md p-0.5 inline-flex text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-800 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                  className="flex-shrink-0 ml-2 bg-transparent rounded-md p-0.5 inline-flex text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-800 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                 >
                   <span className="sr-only">Dismiss</span>
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -429,7 +429,121 @@ const PaperTracking = () => {
             </div>
           )}
           
-          <div className="overflow-x-auto">
+          {/* Mobile view for smaller screens */}
+          <div className="block sm:hidden">
+            {years.map(year => 
+              sessions.map((session, sessionIndex) => {
+                if (!isValidSession(year, session)) {
+                  return null;
+                }
+                
+                const rowKey = `${year}-${session}`;
+                
+                return (
+                  <div 
+                    key={rowKey} 
+                    className={`mb-4 p-3 rounded-lg ${sessionIndex % 2 === 0 ? 'bg-gray-50 dark:bg-gray-700' : 'bg-white dark:bg-gray-800'}`}
+                  >
+                    <div className="font-medium text-gray-900 dark:text-gray-200 mb-2">
+                      {year} - {session}
+                    </div>
+                    
+                    {availablePapers.map(paper => {
+                      const paperKey = paper.toLowerCase().replace(' ', '');
+                      const paperHasTZ = typeof getEffectiveTimezoneSetting === 'function'
+                        ? getEffectiveTimezoneSetting(selectedSubject, paperKey)
+                        : (tzConfig[selectedSubject]?.[paperKey] || false);
+                      const status = getCombinedStatus(selectedSubject, year, session, paper);
+                      
+                      return (
+                        <div key={`${rowKey}-${paper}`} className="py-2 border-t dark:border-gray-600 flex flex-wrap justify-between items-center">
+                          <div className="font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-0">
+                            {paper}
+                          </div>
+                          
+                          {paperHasTZ ? (
+                            <div className="w-full mt-2">
+                              <div className="mb-2">
+                                {status === 'completed' ? (
+                                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200">
+                                    All Complete
+                                  </span>
+                                ) : status === 'partial' ? (
+                                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">
+                                    Partially Complete
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                    Incomplete
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="ml-2 mt-2 space-y-2">
+                                {timezones.map(timezone => (
+                                  <div key={timezone} className="flex items-center justify-between">
+                                    <label className="inline-flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        className="form-checkbox h-5 w-5 text-blue-600 dark:text-blue-400 rounded dark:bg-gray-700 dark:border-gray-600"
+                                        checked={getPaperStatus(selectedSubject, year, session, paper, timezone)}
+                                        onChange={() => handleCheckboxChange(
+                                          selectedSubject,
+                                          year,
+                                          session,
+                                          paper,
+                                          timezone,
+                                          getPaperStatus(selectedSubject, year, session, paper, timezone)
+                                        )}
+                                      />
+                                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{timezone}</span>
+                                    </label>
+                                    {getPaperStatus(selectedSubject, year, session, paper, timezone) && 
+                                     getPaperScore(selectedSubject, year, session, paper, timezone) !== null && (
+                                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        Score: {getPaperScore(selectedSubject, year, session, paper, timezone)}%
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-4">
+                              <label className="inline-flex items-center">
+                                <input
+                                  type="checkbox"
+                                  className="form-checkbox h-5 w-5 text-blue-600 dark:text-blue-400 rounded dark:bg-gray-700 dark:border-gray-600"
+                                  checked={getPaperStatus(selectedSubject, year, session, paper)}
+                                  onChange={() => handleCheckboxChange(
+                                    selectedSubject,
+                                    year,
+                                    session,
+                                    paper,
+                                    null,
+                                    getPaperStatus(selectedSubject, year, session, paper)
+                                  )}
+                                />
+                                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Completed</span>
+                              </label>
+                              {getPaperStatus(selectedSubject, year, session, paper) && getPaperScore(selectedSubject, year, session, paper) !== null && (
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  Score: {getPaperScore(selectedSubject, year, session, paper)}%
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+            )}
+          </div>
+          
+          {/* Desktop table view */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -604,10 +718,10 @@ const PaperTracking = () => {
         </>
       )}
       
-      {/* Score Dialog */}
+      {/* Score Dialog - Make more mobile friendly */}
       {scoreDialog.isOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50 flex items-center justify-center px-4">
+          <div className="relative mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
             <div className="mt-3 text-center">
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Enter Score</h3>
               <div className="mt-2 px-7 py-3">
@@ -625,7 +739,7 @@ const PaperTracking = () => {
                   onChange={handleScoreChange}
                 />
               </div>
-              <div className="items-center px-4 py-3 space-x-4">
+              <div className="flex justify-center items-center px-4 py-3 space-x-4">
                 <button
                   onClick={handleScoreSubmit}
                   disabled={!scoreDialog.paperInfo.tempScore}
@@ -645,8 +759,8 @@ const PaperTracking = () => {
         </div>
       )}
       
-      {/* Feedback Button & Form */}
-      <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+      {/* Feedback Button & Form - Make mobile responsive */}
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-center">
           <button
             onClick={() => setFeedbackOpen(true)}
@@ -660,8 +774,8 @@ const PaperTracking = () => {
         </div>
         
         {feedbackOpen && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50 flex items-center justify-center px-4">
+            <div className="relative mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Your Feedback</h3>

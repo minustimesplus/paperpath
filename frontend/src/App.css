@@ -36,3 +36,45 @@
     transform: rotate(360deg);
   }
 }
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Increase touch target sizes */
+  button, 
+  input[type="checkbox"], 
+  input[type="radio"],
+  select,
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Add better tap highlight color */
+  a, button, input[type="checkbox"], input[type="radio"], label {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Override default input styles for better touch */
+  input[type="checkbox"] {
+    transform: scale(1.25);
+    margin: 0.2rem;
+  }
+  
+  /* Ensure readable font size on mobile */
+  body {
+    font-size: 16px;
+  }
+  
+  /* Improve form field usability */
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.5rem;
+  }
+}
+
+/* Improve dark mode detection */
+@media (prefers-color-scheme: dark) {
+  body:not(.light) {
+    color-scheme: dark;
+  }
+}
