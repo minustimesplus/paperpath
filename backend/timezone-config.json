@@ -21,6 +21,15 @@
       "paper1": false,
       "paper2": false
     },
+    "german_a_language_literature_sl": {
+      "paper1": true,
+      "paper2": false
+    },
+    "german_a_language_literature_hl": {
+      "paper1": true,
+      "paper2": false,
+      "essay": false
+    },
     "german_a_sl": {
       "paper1": true,
       "paper2": false

@@ -4,8 +4,8 @@ export const availableSubjects = [
   { id: 'english_a_literature_hl', name: 'English A Literature HL', group: 1 },
   { id: 'english_a_language_literature_sl', name: 'English A Language & Literature SL', group: 1 },
   { id: 'english_a_language_literature_hl', name: 'English A Language & Literature HL', group: 1 },
-  { id: 'german_a_sl', name: 'German A Literature SL', group: 1 },
-  { id: 'german_a_hl', name: 'German A Literature HL', group: 1 },
+  { id: 'german_a_language_literature_sl', name: 'German A Language & Literature SL', group: 1 },
+  { id: 'german_a_language_literature_hl', name: 'German A Language & Literature HL', group: 1 },
 
   // Group 2: Language Acquisition
   { id: 'english_b_sl', name: 'English B SL', group: 2 },

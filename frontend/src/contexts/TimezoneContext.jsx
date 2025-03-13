@@ -9,7 +9,7 @@ export const useTimezoneConfig = () => {
 
 // Default year range for all subjects
 const DEFAULT_YEAR_RANGE = {
-  startYear: 2014,
+  startYear: 2017,
   endYear: 2024
 };
 

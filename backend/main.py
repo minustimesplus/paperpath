@@ -50,7 +50,7 @@ engine = create_engine(DATABASE_URL)
 # IB Subject Groups
 IB_SUBJECT_GROUPS = {
     "Group 1 - Studies in Language and Literature": [
-        "English A Literature", "English A Language and Literature", "German A"
+        "English A Literature", "English A Language and Literature", "German A Language and Literature"
     ],
     "Group 2 - Language Acquisition": [
         "English B", "French B", "Spanish B", "German B", "Mandarin B", "Italian B"
