@@ -16,6 +16,8 @@ export const availableSubjects = [
   { id: 'spanish_b_hl', name: 'Spanish B HL', group: 2 },
   { id: 'german_b_sl', name: 'German B SL', group: 2 },
   { id: 'german_b_hl', name: 'German B HL', group: 2 },
+  { id: 'italian_b_sl', name: 'Italian B SL', group: 2 },
+  { id: 'italian_b_hl', name: 'Italian B HL', group: 2 },
 
   // Group 3: Individuals and Societies
   { id: 'history_sl', name: 'History SL', group: 3 },
@@ -30,6 +32,8 @@ export const availableSubjects = [
   { id: 'business_hl', name: 'Business Management HL', group: 3 },
   { id: 'philosophy_sl', name: 'Philosophy SL', group: 3 },
   { id: 'philosophy_hl', name: 'Philosophy HL', group: 3 },
+  { id: 'politics_sl', name: 'Politics SL', group: 3 },
+  { id: 'politics_hl', name: 'Politics HL', group: 3 },
 
   // Group 4: Sciences
   { id: 'biology_sl', name: 'Biology SL', group: 4 },
@@ -41,6 +45,8 @@ export const availableSubjects = [
   { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
   { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
   { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
+  { id: 'design_technology_sl', name: 'Design Technology SL', group: 4 },
+  { id: 'design_technology_hl', name: 'Design Technology HL', group: 4 },
 
   // Group 5: Mathematics
   { id: 'math_aa_sl', name: 'Mathematics: Analysis & Approaches SL', group: 5 },
