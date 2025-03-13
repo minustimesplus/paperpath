@@ -182,20 +182,20 @@
     },
     "psychology_sl": {
       "paper1": true,
-      "paper2": true
+      "paper2": false
     },
     "psychology_hl": {
       "paper1": true,
-      "paper2": true,
+      "paper2": false,
       "paper3": false
     },
     "anthropology_sl": {
-      "paper1": true,
-      "paper2": true
+      "paper1": false,
+      "paper2": false
     },
     "anthropology_hl": {
-      "paper1": true,
-      "paper2": true,
+      "paper1": false,
+      "paper2": false,
       "paper3": false
     },
     "biology_sl": {
@@ -220,12 +220,12 @@
     },
     "computer_science_sl": {
       "paper1": true,
-      "paper2": true
+      "paper2": false
     },
     "computer_science_hl": {
       "paper1": true,
-      "paper2": true,
-      "paper3": false
+      "paper2": false,
+      "paper3": true
     },
     "design_tech_sl": {
       "paper1": true,
@@ -238,20 +238,20 @@
     },
     "design_technology_sl": {
       "paper1": true,
-      "paper2": true
+      "paper2": false
     },
     "design_technology_hl": {
       "paper1": true,
-      "paper2": true,
+      "paper2": false,
       "paper3": false
     },
     "ess_sl": {
-      "paper1": true,
-      "paper2": true
+      "paper1": false,
+      "paper2": false
     },
     "ess_hl": {
-      "paper1": true,
-      "paper2": true,
+      "paper1": false,
+      "paper2": false,
       "paper3": false
     },
     "physics_sl": {
@@ -265,14 +265,14 @@
       "paper3": true
     },
     "sports_science_sl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
+      "paper1": false,
+      "paper2": false,
+      "paper3": false
     },
     "sports_science_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
+      "paper1": false,
+      "paper2": false,
+      "paper3": false
     },
     "math_aa_sl": {
       "paper1": true,
