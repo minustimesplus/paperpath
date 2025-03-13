@@ -53,13 +53,13 @@ IB_SUBJECT_GROUPS = {
         "English A Literature", "English A Language and Literature", "German A"
     ],
     "Group 2 - Language Acquisition": [
-        "English B", "French B", "Spanish B", "German B", "Mandarin B"
+        "English B", "French B", "Spanish B", "German B", "Mandarin B", "Italian B"
     ],
     "Group 3 - Individuals and Societies": [
-        "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)", "Philosophy"
+        "History", "Geography", "Economics", "Psychology", "Business Management", "Environmental Systems and Societies (ESS)", "Philosophy", "Politics"
     ],
     "Group 4 - Sciences": [
-        "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)"
+        "Biology", "Chemistry", "Physics", "Computer Science", "Environmental Systems and Societies (ESS)", "Design Technology"
     ],
     "Group 5 - Mathematics": [
         "Mathematics: Analysis and Approaches", "Mathematics: Applications and Interpretation"
