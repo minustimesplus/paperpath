@@ -45,6 +45,7 @@ export const availableSubjects = [
   { id: 'computer_science_sl', name: 'Computer Science SL', group: 4 },
   { id: 'computer_science_hl', name: 'Computer Science HL', group: 4 },
   { id: 'ess_sl', name: 'Environmental Systems & Societies SL', group: 4 },
+  { id: 'ess_hl', name: 'Environmental Systems & Societies HL', group: 4 },
   { id: 'design_technology_sl', name: 'Design Technology SL', group: 4 },
   { id: 'design_technology_hl', name: 'Design Technology HL', group: 4 },
 
