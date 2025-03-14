@@ -227,15 +227,6 @@
     "paper2": false,
     "paper3": true
   },
-  "design_tech_sl": {
-    "paper1": true,
-    "paper2": true
-  },
-  "design_tech_hl": {
-    "paper1": true,
-    "paper2": true,
-    "paper3": false
-  },
   "design_technology_sl": {
     "paper1": true,
     "paper2": false
