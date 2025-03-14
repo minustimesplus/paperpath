@@ -1,317 +1,317 @@
 {
-    "english_a_literature_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "english_a_literature_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "english_a_language_literature_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "english_a_language_literature_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "literature_performance_sl": {
-      "paper1": false,
-      "paper2": false
-    },
-    "german_a_language_literature_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "german_a_language_literature_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "german_a_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "german_a_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "french_a_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "french_a_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "spanish_a_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "spanish_a_hl": {
-      "paper1": true,
-      "paper2": false,
-      "essay": false
-    },
-    "english_b_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "english_b_hl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "french_b_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "french_b_hl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "spanish_b_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "spanish_b_hl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "german_b_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "german_b_hl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "italian_b_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "italian_b_hl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "language_ab_initio_sl": {
-      "paper1": false,
-      "paper2": true
-    },
-    "latin_sl": {
-      "paper1": false,
-      "paper2": false
-    },
-    "latin_hl": {
-      "paper1": false,
-      "paper2": false
-    },
-    "business_management_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "business_management_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "economics_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "economics_hl": {
-      "paper1": true,
-      "paper2": false,
-      "paper3": false
-    },
-    "geography_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "geography_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "global_politics_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "global_politics_hl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "politics_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "politics_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "history_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "history_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "itgs_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "itgs_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "philosophy_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "philosophy_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "psychology_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "psychology_hl": {
-      "paper1": true,
-      "paper2": false,
-      "paper3": false
-    },
-    "anthropology_sl": {
-      "paper1": false,
-      "paper2": false
-    },
-    "anthropology_hl": {
-      "paper1": false,
-      "paper2": false,
-      "paper3": false
-    },
-    "biology_sl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "biology_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "chemistry_sl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "chemistry_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "computer_science_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "computer_science_hl": {
-      "paper1": true,
-      "paper2": false,
-      "paper3": true
-    },
-    "design_tech_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "design_tech_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": false
-    },
-    "design_technology_sl": {
-      "paper1": true,
-      "paper2": false
-    },
-    "design_technology_hl": {
-      "paper1": true,
-      "paper2": false,
-      "paper3": false
-    },
-    "ess_sl": {
-      "paper1": false,
-      "paper2": false
-    },
-    "ess_hl": {
-      "paper1": false,
-      "paper2": false,
-      "paper3": false
-    },
-    "physics_sl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "physics_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "sports_science_sl": {
-      "paper1": false,
-      "paper2": false,
-      "paper3": false
-    },
-    "sports_science_hl": {
-      "paper1": false,
-      "paper2": false,
-      "paper3": false
-    },
-    "math_aa_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "math_aa_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "math_ai_sl": {
-      "paper1": true,
-      "paper2": true
-    },
-    "math_ai_hl": {
-      "paper1": true,
-      "paper2": true,
-      "paper3": true
-    },
-    "dance_sl": {
-      "paper1": false
-    },
-    "dance_hl": {
-      "paper1": false
-    },
-    "film_sl": {
-      "paper1": false
-    },
-    "film_hl": {
-      "paper1": false
-    },
-    "music_sl": {
-      "paper1": true
-    },
-    "music_hl": {
-      "paper1": true
-    },
-    "theatre_sl": {},
-    "theatre_hl": {},
-    "visual_arts_sl": {},
-    "visual_arts_hl": {}
-  }
+  "english_a_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_a_language_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "english_a_language_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "literature_performance_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "german_a_language_literature_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "german_a_language_literature_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "german_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "german_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "french_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "french_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "spanish_a_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "spanish_a_hl": {
+    "paper1": true,
+    "paper2": false,
+    "essay": false
+  },
+  "english_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "english_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "french_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "spanish_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "german_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "italian_b_sl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "italian_b_hl": {
+    "paper1": false,
+    "paper2": true
+  },
+  "italian_ab_initio": {
+    "paper1": false,
+    "paper2": true
+  },
+  "latin_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "latin_hl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "business_management_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "business_management_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "economics_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "economics_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": false
+  },
+  "geography_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "geography_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "global_politics_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "global_politics_hl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "politics_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "politics_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "history_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "history_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "itgs_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "itgs_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "philosophy_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "philosophy_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "psychology_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "psychology_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": false
+  },
+  "anthropology_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "anthropology_hl": {
+    "paper1": false,
+    "paper2": false,
+    "paper3": false
+  },
+  "biology_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "biology_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "chemistry_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "computer_science_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "computer_science_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": true
+  },
+  "design_tech_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "design_tech_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": false
+  },
+  "design_technology_sl": {
+    "paper1": true,
+    "paper2": false
+  },
+  "design_technology_hl": {
+    "paper1": true,
+    "paper2": false,
+    "paper3": false
+  },
+  "ess_sl": {
+    "paper1": false,
+    "paper2": false
+  },
+  "ess_hl": {
+    "paper1": false,
+    "paper2": false,
+    "paper3": false
+  },
+  "physics_sl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "physics_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "sports_science_sl": {
+    "paper1": false,
+    "paper2": false,
+    "paper3": false
+  },
+  "sports_science_hl": {
+    "paper1": false,
+    "paper2": false,
+    "paper3": false
+  },
+  "math_aa_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_aa_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "math_ai_sl": {
+    "paper1": true,
+    "paper2": true
+  },
+  "math_ai_hl": {
+    "paper1": true,
+    "paper2": true,
+    "paper3": true
+  },
+  "dance_sl": {
+    "paper1": false
+  },
+  "dance_hl": {
+    "paper1": false
+  },
+  "film_sl": {
+    "paper1": false
+  },
+  "film_hl": {
+    "paper1": false
+  },
+  "music_sl": {
+    "paper1": true
+  },
+  "music_hl": {
+    "paper1": true
+  },
+  "theatre_sl": {},
+  "theatre_hl": {},
+  "visual_arts_sl": {},
+  "visual_arts_hl": {}
+}

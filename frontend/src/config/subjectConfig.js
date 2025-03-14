@@ -18,6 +18,7 @@ export const availableSubjects = [
   { id: 'german_b_hl', name: 'German B HL', group: 2 },
   { id: 'italian_b_sl', name: 'Italian B SL', group: 2 },
   { id: 'italian_b_hl', name: 'Italian B HL', group: 2 },
+  { id: 'italian_ab_initio', name: 'Italian ab initio', group: 2 },
 
   // Group 3: Individuals and Societies
   { id: 'history_sl', name: 'History SL', group: 3 },
